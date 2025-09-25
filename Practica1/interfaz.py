@@ -3,6 +3,18 @@ from ttkbootstrap.constants import *
 from ttkbootstrap.scrolled import ScrolledFrame
 from tkinter import filedialog, messagebox, Canvas
 from Imagen import Imagen as Img
+# imports (al inicio del archivo)
+import matplotlib
+matplotlib.use("TkAgg")  # backend para Tkinter
+from matplotlib.figure import Figure
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+import matplotlib.pyplot as plt
+import numpy as np
+import cv2
+
+
+
+
 
 class Interfaz(ttk.Window):
     def __init__(self):
@@ -112,78 +124,92 @@ class Interfaz(ttk.Window):
                 messagebox.showerror("Error", "No se pudo obtener el modelo de color seleccionado.")
 
     def cargarModeloRGB(self):
-        self.marcoRGB = ttk.Labelframe(self.panelVisualizacion, text="Modelo RGB", padding=10, bootstyle="primary")
+        if not self.imagen:
+            messagebox.showwarning("Atención", "Primero carga una imagen.")
+            return
+
+        self.marcoRGB = ttk.Labelframe(self.panelVisualizacion, text="Modelo RGB (Matplotlib)", padding=10, bootstyle="primary")
         self.marcoRGB.grid(row=1, column=0, sticky="nsew", padx=5, pady=5)
-        for i in range (3): self.marcoRGB.columnconfigure(i, weight=1)
-        for i in range (2): self.marcoRGB.rowconfigure(i, weight=1)
+        self.marcoRGB.columnconfigure(0, weight=1); self.marcoRGB.rowconfigure(1, weight=1)
+        ttk.Label(self.marcoRGB, text="Modelo RGB", font=("Arial", 16, "bold")).grid(row=0, column=0, sticky="w", padx=5, pady=5)
 
-        self.tituloModeloRGB = ttk.Label(self.marcoRGB, text="Modelo RGB", font=("Arial", 16, "bold"))
-        self.tituloModeloRGB.grid(row=0, column=0, sticky="nsew", padx=5, pady=5, columnspan=3)
+        R, G, B = cv2.split(self.imagen.imagenCv)
+        fig = Figure(figsize=(12, 3.8), dpi=100)
+        ax1 = fig.add_subplot(1, 3, 1)
+        ax2 = fig.add_subplot(1, 3, 2)
+        ax3 = fig.add_subplot(1, 3, 3)
+        ax1.imshow(R, cmap="Reds", vmin=0, vmax=255); ax1.set_title("Canal R"); ax1.axis("off")
+        ax2.imshow(G, cmap="Greens", vmin=0, vmax=255); ax2.set_title("Canal G"); ax2.axis("off")
+        ax3.imshow(B, cmap="Blues", vmin=0, vmax=255); ax3.set_title("Canal B"); ax3.axis("off")
+        fig.suptitle("Modelo RGB")
 
-        imgs = self.imagen.obtenerModeloRGB()   # tupla (R,G,B)
-        self._imgs_rgb = imgs
-        labelTitleRed= ttk.Label(self.marcoRGB, text="Rojo", font=("Arial", 12, "bold"))
-        labelTitleGreen= ttk.Label(self.marcoRGB, text="Verde", font=("Arial", 12, "bold"))
-        labelTitleBlue= ttk.Label(self.marcoRGB, text="Azul", font=("Arial", 12, "bold"))
-        labelTitleRed.grid(row=1, column=0, sticky="nsew", padx=5, pady=5)
-        labelTitleGreen.grid(row=1, column=1, sticky="nsew", padx=5, pady=5)
-        labelTitleBlue.grid(row=1, column=2, sticky="nsew", padx=5, pady=5)
-
-        labelR = ttk.Label(self.marcoRGB, image=imgs[0]); labelR.image = imgs[0]
-        labelG = ttk.Label(self.marcoRGB, image=imgs[1]); labelG.image = imgs[1]
-        labelB = ttk.Label(self.marcoRGB, image=imgs[2]); labelB.image = imgs[2]
-        labelR.grid(row=2, column=0, sticky="nsew", padx=5, pady=5)
-        labelG.grid(row=2, column=1, sticky="nsew", padx=5, pady=5)
-        labelB.grid(row=2, column=2, sticky="nsew", padx=5, pady=5)
+        canvas = FigureCanvasTkAgg(fig, master=self.marcoRGB)
+        canvas.draw()
+        canvas.get_tk_widget().grid(row=1, column=0, sticky="nsew")
+        self._canvas_rgb = canvas
 
     def cargarModeloHSV(self):
-        self.marcoHSV = ttk.Labelframe(self.panelVisualizacion, text="Modelo HSV", padding=10, bootstyle="success")
+        if not self.imagen:
+            messagebox.showwarning("Atención", "Primero carga una imagen.")
+            return
+
+        self.marcoHSV = ttk.Labelframe(self.panelVisualizacion, text="Modelo HSV (Matplotlib)", padding=10, bootstyle="success")
         self.marcoHSV.grid(row=2, column=0, sticky="nsew", padx=5, pady=5)
-        for i in range (3): self.marcoHSV.columnconfigure(i, weight=1)
-        for i in range (2): self.marcoHSV.rowconfigure(i, weight=1)
+        self.marcoHSV.columnconfigure(0, weight=1)
+        self.marcoHSV.rowconfigure(1, weight=1)
 
-        self.tituloModeloHSV = ttk.Label(self.marcoHSV, text="Modelo HSV", font=("Arial", 16, "bold"))
-        self.tituloModeloHSV.grid(row=0, column=0, sticky="nsew", padx=5, pady=5, columnspan=3)
+        ttk.Label(self.marcoHSV, text="Modelo HSV", font=("Arial", 16, "bold")).grid( row=0, column=0, sticky="w", padx=5, pady=5)
 
-        imgs = self.imagen.obtenerModeloHSV()   # tupla (H,S,V)
-        self._imgs_hsv = imgs
-        labelTitleHue= ttk.Label(self.marcoHSV, text="Hue", font=("Arial", 12, "bold"))
-        labelTitleSaturation = ttk.Label(self.marcoHSV, text="Saturation", font=("Arial", 12, "bold"))
-        labelTitleValue = ttk.Label(self.marcoHSV, text="Value", font=("Arial", 12, "bold"))
-        labelTitleHue.grid(row=1, column=0, sticky="nsew", padx=5, pady=5)
-        labelTitleSaturation.grid(row=1, column=1, sticky="nsew", padx=5, pady=5)
-        labelTitleValue.grid(row=1, column=2, sticky="nsew", padx=5, pady=5)
+        rgb = self.imagen.imagenCv
+        hsv = cv2.cvtColor(rgb, cv2.COLOR_RGB2HSV)
+        H, S, V = cv2.split(hsv)
 
-        labelH = ttk.Label(self.marcoHSV, image=imgs[0]); labelH.image = imgs[0]
-        labelS = ttk.Label(self.marcoHSV, image=imgs[1]); labelS.image = imgs[1]
-        labelV = ttk.Label(self.marcoHSV, image=imgs[2]); labelV.image = imgs[2]
-        labelH.grid(row=2, column=0, sticky="nsew", padx=5, pady=5)
-        labelS.grid(row=2, column=1, sticky="nsew", padx=5, pady=5)
-        labelV.grid(row=2, column=2, sticky="nsew", padx=5, pady=5)
+        fig = Figure(figsize=(12, 3.8), dpi=100) 
+        ax1 = fig.add_subplot(1, 3, 1)
+        ax2 = fig.add_subplot(1, 3, 2)
+        ax3 = fig.add_subplot(1, 3, 3)
+
+        im1 = ax1.imshow(H, cmap="hsv", vmin=0, vmax=179)
+        ax1.set_title("Canal H"); ax1.axis("off")
+
+        im2 = ax2.imshow(S, cmap="gray", vmin=0, vmax=255)
+        ax2.set_title("Canal S"); ax2.axis("off")
+
+        im3 = ax3.imshow(V, cmap="gray", vmin=0, vmax=255)
+        ax3.set_title("Canal V"); ax3.axis("off")
+
+        fig.suptitle("Modelo HSV")
+        canvas = FigureCanvasTkAgg(fig, master=self.marcoHSV)
+        canvas.draw()
+        canvas_widget = canvas.get_tk_widget()
+        canvas_widget.grid(row=1, column=0, sticky="nsew")
+        self._canvas_hsv = canvas
 
     def cargarModeloCMY(self):
-        self.marcoCMY = ttk.Labelframe(self.panelVisualizacion, text="Modelo CMY", padding=10, bootstyle="warning")
+        if not self.imagen:
+            messagebox.showwarning("Atención", "Primero carga una imagen.")
+            return
+
+        self.marcoCMY = ttk.Labelframe(self.panelVisualizacion, text="Modelo CMY (Matplotlib)", padding=10, bootstyle="warning")
         self.marcoCMY.grid(row=3, column=0, sticky="nsew", padx=5, pady=5)
-        for i in range (3): self.marcoCMY.columnconfigure(i, weight=1)
-        for i in range (2): self.marcoCMY.rowconfigure(i, weight=1)
+        self.marcoCMY.columnconfigure(0, weight=1); self.marcoCMY.rowconfigure(1, weight=1)
+        ttk.Label(self.marcoCMY, text="Modelo CMY", font=("Arial", 16, "bold")).grid(row=0, column=0, sticky="w", padx=5, pady=5)
+        R, G, B = cv2.split(self.imagen.imagenCv)
+        C = 255 - R; M = 255 - G; Y = 255 - B
+        fig = Figure(figsize=(12, 3.8), dpi=100)
+        ax1 = fig.add_subplot(1, 3, 1)
+        ax2 = fig.add_subplot(1, 3, 2)
+        ax3 = fig.add_subplot(1, 3, 3)
+        ax1.imshow(C, cmap="Blues",   vmin=0, vmax=255); ax1.set_title("Canal C"); ax1.axis("off")
+        ax2.imshow(M, cmap="Purples", vmin=0, vmax=255); ax2.set_title("Canal M"); ax2.axis("off")
+        ax3.imshow(Y, cmap="Oranges", vmin=0, vmax=255); ax3.set_title("Canal Y"); ax3.axis("off")
+        fig.suptitle("Modelo CMY")
 
-        self.tituloModeloCMY = ttk.Label(self.marcoCMY, text="Modelo CMY", font=("Arial", 16, "bold"))
-        self.tituloModeloCMY.grid(row=0, column=0, sticky="nsew", padx=5, pady=5    , columnspan=3)
+        canvas = FigureCanvasTkAgg(fig, master=self.marcoCMY)
+        canvas.draw()
+        canvas.get_tk_widget().grid(row=1, column=0, sticky="nsew")
+        self._canvas_cmy = canvas
 
-        imgs = self.imagen.obtenerModeloCMY()   # tupla (C,M,Y)
-        self._imgs_cmy = imgs
-        labelTitleCyan= ttk.Label(self.marcoCMY, text="Cyan", font=("Arial", 12, "bold"))
-        labelTitleMagenta = ttk.Label(self.marcoCMY, text="Magenta", font=("Arial", 12, "bold"))
-        labelTitleYellow = ttk.Label(self.marcoCMY, text="Yellow", font=("Arial", 12, "bold"))
-        labelTitleCyan.grid(row=1, column=0, sticky="nsew", padx=5, pady=5)
-        labelTitleMagenta.grid(row=1, column=1, sticky="nsew", padx=5, pady=5)
-        labelTitleYellow.grid(row=1, column=2, sticky="nsew", padx=5, pady=5)
-        labelC = ttk.Label(self.marcoCMY, image=imgs[0]); labelC.image = imgs[0]
-        labelM = ttk.Label(self.marcoCMY, image=imgs[1]); labelM.image = imgs[1]
-        labelY = ttk.Label(self.marcoCMY, image=imgs[2]); labelY.image = imgs[2]
-        labelC.grid(row=2, column=0, sticky="nsew", padx=5, pady=5)
-        labelM.grid(row=2, column=1, sticky="nsew", padx=5, pady=5)
-        labelY.grid(row=2, column=2, sticky="nsew", padx=5, pady=5)
 
 
 if __name__ == "__main__":

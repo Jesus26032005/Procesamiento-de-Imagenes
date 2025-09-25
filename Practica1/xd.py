@@ -5,7 +5,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 # 1. Lectura de imagen con Pillow
 # 2. Lectura de imagen con OpenCV
-imagen_cv = cv2.imread("Practica1/images.jpg")
+imagen_cv = cv2.imread("Practica1/fondo.jpg")
 imagen_cv_rgb = cv2.cvtColor(imagen_cv, cv2.COLOR_BGR2RGB)
 
 # 3. Visualización de modelos de color
