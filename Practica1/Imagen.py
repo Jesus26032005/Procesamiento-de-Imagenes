@@ -3,7 +3,7 @@
                             DERECHOS DE AUTOR
 ===============================================================================
 © 2025 - Práctica 1: Clase Imagen - Procesamiento de Imágenes
-Autor: Zaddkiel de Jesús Martínez Alor
+Autor: Zaddkiel de Jesus Martinez Alor,Herrera Monroy Abraham Andre, Marcelino Lopez Jessica
 Materia: Procesamiento De Imagenes
 Semestre: Cuarto Semestre
 Institución: Escuela Superior de Cómputo, Instituto Politécnico Nacional
@@ -28,8 +28,7 @@ from PIL import Image as ImagenPillow, ImageTk, UnidentifiedImageError
 from tkinter import messagebox
 # Importación de NumPy para operaciones matemáticas eficientes con arrays multidimensionales
 import numpy as np
-# Importación de OpenCV para procesamiento avanzado de imágenes y visión computacional
-import cv2
+
 
 # Definición de la clase Imagen para encapsular operaciones de carga y procesamiento de imágenes
 class Imagen:
@@ -95,8 +94,9 @@ class Imagen:
         except Exception as e:
             messagebox.showerror("Error", f"Ocurrió un error inesperado de tipo: {e}")
             return False
-
-    def obtenerImagenGris(self, modo= "Tk"):
+    
+    # Método para convertir la imagen cargada a escala de grises manualmente
+    def obtenerImagenGris(self):
         # Verificación de que la imagen en formato OpenCV esté cargada
         try:
             if self.imagenCv is not None:
@@ -109,12 +109,9 @@ class Imagen:
                         gris = int(0.299 * self.imagenCv[i, j, 0] + 0.587 * self.imagenCv[i, j, 1] + 0.114 * self.imagenCv[i, j, 2])
 
                         imagenGris[i, j] = gris
-                if modo == "Tk":
-                    imagenGrisPillow = ImagenPillow.fromarray(imagenGris)
-                    imagenGrisPillow.thumbnail((1400,600), ImagenPillow.LANCZOS)
-                    return ImageTk.PhotoImage(imagenGrisPillow)
-                else:
-                    return imagenGris
+                imagenGrisPillow = ImagenPillow.fromarray(imagenGris)
+                imagenGrisPillow.thumbnail((1400,600), ImagenPillow.LANCZOS)
+                return ImageTk.PhotoImage(imagenGrisPillow)
             else:
                 messagebox.showerror("Error", "La imagen no ha sido cargada correctamente.")
             return None
