@@ -1,5 +1,6 @@
 from PIL import Image as ImagenPillow, ImageTk, UnidentifiedImageError
 from tkinter import messagebox
+import cv2
 import numpy as np
 
 class Imagen:
@@ -59,30 +60,18 @@ class Imagen:
             messagebox.showerror("Error", f"Ocurrió un error inesperado de tipo: {e}")
             return None
 
+    def histogramaGris(self):
+        imagenGris = self.obtenerImagenGris(modo="Data")
+        valor, frecuencia = np.unique(imagenGris, return_counts=True)
+
+    def histogramaColor(self):
+        if self.imagenCv is not None:
+            canalR, canalG, canalB = cv2.split(self.imagenCv)
+            valorR, frecuenciaR = np.unique(canalR, return_counts=True)
+            valorG, frecuenciaG = np.unique(canalG, return_counts=True)
+            valorB, frecuenciaB = np.unique(canalB, return_counts=True)
+            return (valorR, frecuenciaR), (valorG, frecuenciaG), (valorB, frecuenciaB)
+
     def obtenerHistogramaGris(self):
         if self.imagenCv is not None:
             alto, ancho = self.imagenCv.shape[0], self.imagenCv.shape[1]
-            histograma = np.zeros(256, dtype=int)
-            imagenGris = self.obtenerImagenGris(modo="Data")
-            for i in range(alto):
-                for j in range(ancho):
-                    valorGris = imagenGris[i, j]
-                    histograma[valorGris] += 1
-            return histograma
-
-    def obtenerImagenBinaria(self):
-        if self.imagenCv is not None:
-            alto, ancho = self.imagenCv.shape[0], self.imagenCv.shape[1]
-            imagenBinaria = np.zeros((alto, ancho), dtype=np.uint8)
-            imagenGris = self.obtenerImagenGris(modo="Data")
-            histograma = self.obtenerHistogramaGris()
-            umbral = np.argmax(histograma)
-            for i in range(alto):
-                for j in range(ancho):
-                    if imagenGris[i, j] > umbral:
-                        imagenBinaria[i, j] = 255
-                    else:
-                        imagenBinaria[i, j] = 0
-            imagenBinariaPillow = ImagenPillow.fromarray(imagenBinaria)
-            imagenBinariaPillow.thumbnail((1400,600), ImagenPillow.LANCZOS)
-            return ImageTk.PhotoImage(imagenBinariaPillow)

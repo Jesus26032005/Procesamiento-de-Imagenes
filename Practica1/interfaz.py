@@ -1,4 +1,3 @@
-
 import ttkbootstrap as ttk
 import ttkbootstrap as ttk
 from ttkbootstrap.constants import *
@@ -16,6 +15,7 @@ class Interfaz(ttk.Window):
         self.crearLayout()
         self.mainloop()
 
+    # CONFIGURACIONES INICIALES DE LA VENTANA
     def configuracionesIniciales(self):
         super().__init__(themename="solar")
         self.title("Practica 1")
@@ -26,6 +26,7 @@ class Interfaz(ttk.Window):
         self.columnconfigure(0, weight=0)
         self.columnconfigure(1, weight=1)
 
+    # CREACION DEL LAYOUT Y SUS CONTROLES
     def crearLayout(self):
         self.panelControl = ttk.Frame(self, padding=10, bootstyle="DARK", width=400)
         self.panelControl.grid(row=0, column=0, sticky="nsew", rowspan=10)
@@ -39,9 +40,9 @@ class Interfaz(ttk.Window):
         self.panelVisualizacion.grid(row=0, column=1, sticky="nsew", rowspan=10)
         self.panelVisualizacion.columnconfigure(0, weight=1)
 
+        self.crearMuestraResultado()
         self.crearControlesCargarImagen()
         self.crearControlesMostrarModelos()
-        self.crearMuestraResultado()
         self.crearControlesGrisBinarizacion()
 
     def crearControlesCargarImagen(self):
@@ -86,13 +87,26 @@ class Interfaz(ttk.Window):
         self.subTituloConversiones = ttk.Label(self.marcoConversiones, text="Conversion de gris-binario", font=("Arial", 12, "bold"))
         self.indicacionesConversiones = ttk.Label(self.marcoConversiones, text="Seleccione un modelo de color para visualizarlo", font=("Arial", 10))
         self.botonModeloGris = ttk.Button(self.marcoConversiones, text="Convertir a escala de gris", bootstyle="success", command=self.convertirEscalaGris)
-        self.binarizar = ttk.Button(self.marcoConversiones, text="Binarizar imagen", bootstyle="success", command=self.binarizarImagen)
+        self.binarizar = ttk.Button(self.marcoConversiones, text="Binarizar imagen", bootstyle="success", command=self.binarizarImagen, state=DISABLED)
 
         self.subTituloConversiones.grid(row=0, column=0, columnspan=3, sticky="nsew", padx=5, pady=5)
         self.indicacionesConversiones.grid(row=1, column=0, columnspan=3, sticky="nsew", padx=5, pady=5)
         self.botonModeloGris.grid(row=2, column=0, sticky="nsew", padx=5, pady=5)
         self.binarizar.grid(row=2, column=1, sticky="nsew", padx=5, pady=5)
 
+    # FUNCION PARA LABEL INICIAL DE PANEL DE VISUALIZACION
+    def crearMuestraResultado(self):
+        self.marcoMapa = ttk.Labelframe(self.panelVisualizacion, text="Visualización de la imagen", padding=10, bootstyle="info")
+        self.marcoMapa.grid(row=0, column=0, sticky="nsew", padx=5, pady=5)
+        self.marcoMapa.rowconfigure(0, weight=1)
+        self.marcoMapa.rowconfigure(1, weight=1)
+        self.marcoMapa.columnconfigure(0, weight=1)
+        self.tituloVisualizacion = ttk.Label(self.marcoMapa, text="Visualización de la imagen", font=("Arial", 16, "bold"))
+        self.SubImagen = ttk.Label(self.marcoMapa, text="Aquí se mostrará la imagen cargada y sus modelos de color", font=("Arial", 12), anchor="center")
+        self.tituloVisualizacion.grid(row=0, column=0, sticky="nsew", padx=5, pady=5)
+        self.SubImagen.grid(row=1, column=0, sticky="nsew", padx=5, pady=5)
+
+    # FUNCION PARA CONVERTIR A ESCALA DE GRIS O BINARY
     def convertirEscalaGris(self):
         if not self.imagen:
             messagebox.showwarning("Atención", "Primero carga una imagen.")
@@ -106,28 +120,24 @@ class Interfaz(ttk.Window):
         self.subImagenGris.grid(row=0, column=0, sticky="nsew", padx=5, pady=5)
         imagenGrisPillow = self.imagen.obtenerImagenGris()
         if imagenGrisPillow:
-            self.subImagenGris.configure(image=imagenGrisPillow)
+            self.subImagenGris.configure(image=imagenGrisPillow, anchor="center")
             self.subImagenGris.image = imagenGrisPillow
         else:
             messagebox.showerror("Error", "No se pudo convertir la imagen a escala de grises.")
 
     def binarizarImagen(self):
         pass
-
-    def crearMuestraResultado(self):
-        self.marcoMapa = ttk.Labelframe(self.panelVisualizacion, text="Visualización de la imagen", padding=10, bootstyle="info")
-        self.marcoMapa.grid(row=0, column=0, sticky="nsew", padx=5, pady=5)
-        self.marcoMapa.rowconfigure(0, weight=1)
-        self.marcoMapa.rowconfigure(1, weight=1)
-        self.marcoMapa.columnconfigure(0, weight=1)
-        self.tituloVisualizacion = ttk.Label(self.marcoMapa, text="Visualización de la imagen", font=("Arial", 16, "bold"))
-        self.SubImagen = ttk.Label(self.marcoMapa, text="Aquí se mostrará la imagen cargada y sus modelos de color", font=("Arial", 12), anchor="center")
-        self.tituloVisualizacion.grid(row=0, column=0, sticky="nsew", padx=5, pady=5)
-        self.SubImagen.grid(row=1, column=0, sticky="nsew", padx=5, pady=5)
-
+    
+    # FUNCION DE CARGAR IMAGEN
     def cargarImagen(self):
         rutaArchivo= filedialog.askopenfilename(title="Seleccionar imagen", filetypes=[("Image files", "*.jpg *.jpeg *.png"), ("All files")])
         if rutaArchivo:
+            if self.imagen:
+                self.marcoGris.destroy()
+                self.marcoRGB.destroy()
+                self.marcoHSV.destroy()
+                self.marcoCMY.destroy()
+
             self.imagen = Img(rutaArchivo)
             imagenTkinter = self.imagen.iniciarImagen()
             if imagenTkinter:
@@ -137,15 +147,7 @@ class Interfaz(ttk.Window):
         else:
             messagebox.showwarning("Advertencia", "No se seleccionó ninguna imagen.")
 
-    def mostrarModelo(self, modelo):
-        if hasattr(self, 'imagen'):
-            imagenModelo = self.imagen.obtenerModelo(modelo)
-            if imagenModelo:
-                self.SubImagen.configure(image=imagenModelo)
-                self.SubImagen.image = imagenModelo
-            else:
-                messagebox.showerror("Error", "No se pudo obtener el modelo de color seleccionado.")
-
+    # FUNCIONES PARA CARGAR LOS MODELOS DE COLOR
     def cargarModeloRGB(self):
         if not self.imagen:
             messagebox.showwarning("Atención", "Primero carga una imagen.")
