@@ -8,6 +8,8 @@ from matplotlib.figure import Figure
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import cv2
 
+
+
 class Interfaz(ttk.Window):
     def __init__(self):
         self.imagen = None
