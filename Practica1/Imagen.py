@@ -39,32 +39,3 @@ class Imagen:
         except Exception as e:
             messagebox.showerror("Error", f"Ocurrió un error inesperado de tipo: {e}")
             return False
-
-    def obtenerModeloRGB(self):
-        R, G, B = cv2.split(self.imagenCv)
-        def to_photo(arr):
-            pil = ImagenPillow.fromarray(arr)
-            pil.thumbnail((400, 400), ImagenPillow.LANCZOS)
-            return ImageTk.PhotoImage(pil)
-        return to_photo(R), to_photo(G), to_photo(B)
-
-    def obtenerModeloHSV(self):
-        hsv = cv2.cvtColor(self.imagenCv, cv2.COLOR_RGB2HSV)
-        H, S, V = cv2.split(hsv)
-        def to_photo(arr):
-            pil = ImagenPillow.fromarray(arr)
-            pil.thumbnail((400, 400), ImagenPillow.LANCZOS)
-            return ImageTk.PhotoImage(pil)
-        return to_photo(H), to_photo(S), to_photo(V)
-
-    def obtenerModeloCMY(self): 
-        R, G, B = cv2.split(self.imagenCv)
-        C = 255 - R
-        M = 255 - G
-        Y = 255 - B
-        def to_photo(arr):
-            pil = ImagenPillow.fromarray(arr)
-            pil.thumbnail((400, 400), ImagenPillow.LANCZOS)
-            return ImageTk.PhotoImage(pil)
-        return to_photo(C), to_photo(M), to_photo(Y)
-

@@ -3,18 +3,9 @@ from ttkbootstrap.constants import *
 from ttkbootstrap.scrolled import ScrolledFrame
 from tkinter import filedialog, messagebox, Canvas
 from Imagen import Imagen as Img
-# imports (al inicio del archivo)
-import matplotlib
-matplotlib.use("TkAgg")  # backend para Tkinter
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
-import matplotlib.pyplot as plt
-import numpy as np
 import cv2
-
-
-
-
 
 class Interfaz(ttk.Window):
     def __init__(self):
@@ -141,12 +132,9 @@ class Interfaz(ttk.Window):
         ax1.imshow(R, cmap="Reds", vmin=0, vmax=255); ax1.set_title("Canal R"); ax1.axis("off")
         ax2.imshow(G, cmap="Greens", vmin=0, vmax=255); ax2.set_title("Canal G"); ax2.axis("off")
         ax3.imshow(B, cmap="Blues", vmin=0, vmax=255); ax3.set_title("Canal B"); ax3.axis("off")
-        fig.suptitle("Modelo RGB")
-
         canvas = FigureCanvasTkAgg(fig, master=self.marcoRGB)
         canvas.draw()
         canvas.get_tk_widget().grid(row=1, column=0, sticky="nsew")
-        self._canvas_rgb = canvas
 
     def cargarModeloHSV(self):
         if not self.imagen:
@@ -163,18 +151,14 @@ class Interfaz(ttk.Window):
         rgb = self.imagen.imagenCv
         hsv = cv2.cvtColor(rgb, cv2.COLOR_RGB2HSV)
         H, S, V = cv2.split(hsv)
-
         fig = Figure(figsize=(12, 3.8), dpi=100) 
         ax1 = fig.add_subplot(1, 3, 1)
         ax2 = fig.add_subplot(1, 3, 2)
         ax3 = fig.add_subplot(1, 3, 3)
-
         im1 = ax1.imshow(H, cmap="hsv", vmin=0, vmax=179)
         ax1.set_title("Canal H"); ax1.axis("off")
-
         im2 = ax2.imshow(S, cmap="gray", vmin=0, vmax=255)
         ax2.set_title("Canal S"); ax2.axis("off")
-
         im3 = ax3.imshow(V, cmap="gray", vmin=0, vmax=255)
         ax3.set_title("Canal V"); ax3.axis("off")
 
@@ -183,7 +167,6 @@ class Interfaz(ttk.Window):
         canvas.draw()
         canvas_widget = canvas.get_tk_widget()
         canvas_widget.grid(row=1, column=0, sticky="nsew")
-        self._canvas_hsv = canvas
 
     def cargarModeloCMY(self):
         if not self.imagen:
@@ -208,8 +191,6 @@ class Interfaz(ttk.Window):
         canvas = FigureCanvasTkAgg(fig, master=self.marcoCMY)
         canvas.draw()
         canvas.get_tk_widget().grid(row=1, column=0, sticky="nsew")
-        self._canvas_cmy = canvas
-
 
 
 if __name__ == "__main__":
