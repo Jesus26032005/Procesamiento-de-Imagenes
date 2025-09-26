@@ -28,7 +28,7 @@ from ttkbootstrap.constants import *
 # Importación del widget ScrolledFrame para crear marcos con barras de desplazamiento automáticas
 from ttkbootstrap.scrolled import ScrolledFrame
 # Importación de módulos específicos de tkinter: filedialog para diálogos de archivos, messagebox para ventanas emergentes
-from tkinter import filedialog, messagebox, Canvas
+from tkinter import filedialog, messagebox
 # Importación de la clase personalizada Imagen desde el módulo local, renombrada como Img para facilitar su uso
 from Imagen import Imagen as Img
 # Importación de la clase Figure de matplotlib para crear figuras de gráficos
@@ -99,6 +99,7 @@ class Interfaz(ttk.Window):
         self.crearControlesMostrarModelos()
         # Crea el área donde se mostrarán los resultados y visualizaciones
         self.crearMuestraResultado()
+        self.crearControlesGrisUmbralizacion()
 
     # Método para crear la sección de controles de carga de imágenes
     def crearControlesCargarImagen(self):
@@ -159,6 +160,76 @@ class Interfaz(ttk.Window):
         # Posicionamiento de botón CMY en fila 2, columna 2 completando la fila horizontal
         self.botonModeloCMY.grid(row=2, column=2, sticky="nsew", padx=5, pady=5)
     
+    def crearControlesGrisUmbralizacion(self):
+        # Creación de Labelframe para agrupar controles de modelos con estilo secundario (gris/verde)
+        self.marcoConversiones = ttk.Labelframe(self.panelControl, text="Elegir cambio a mostrar", padding=10, bootstyle="success")
+        # Posicionamiento en fila 2 del panel de control con expansión y márgenes
+        self.marcoConversiones.grid(row=3, column=0, sticky="nsew", padx=5, pady=5)
+        # Configuración de grid: 3 columnas con distribución equitativa para los botones horizontales
+        for i in range(3): self.marcoConversiones.columnconfigure(i, weight=1)
+        # Configuración de 3 filas (0: título, 1: instrucciones, 2: botones) con distribución proporcional
+        for i in range(3):self.marcoConversiones.rowconfigure(i, weight=1)
+
+        # Creación de subtítulo descriptivo de la sección con fuente Arial 12px negrita
+        self.subTituloConversiones = ttk.Label(self.marcoConversiones, text="Modelos de color", font=("Arial", 12, "bold"))
+        # Creación de etiqueta con instrucciones para el usuario, fuente Arial 10px normal
+        self.indicacionesConversiones = ttk.Label(self.marcoConversiones, text="Seleccione un modelo de color para visualizarlo", font=("Arial", 10))
+        # Creación de botón para modelo RGB , vinculado al método cargarModeloRGB
+        self.botonModeloGris = ttk.Button(self.marcoConversiones, text="Convertir a escala de gris", bootstyle="success", command=self.convertirGris)
+        # Creación de botón para modelo HSV , vinculado al método cargarModeloHSV
+        self.botonModeloUmbralizarFijo = ttk.Button(self.marcoConversiones, text="Umbralizar con fijo", bootstyle="success", command=self.convertirUmbralizarFijo)
+        # Creación de botón para modelo CMY , vinculado al método cargarModeloCMY
+        self.botonModeloUmbralizarAdaptativo = ttk.Button(self.marcoConversiones, text="Umbralizar con adaptativo", bootstyle="success", command=self.convertirUmbralizarAdaptativo)
+
+        # Posicionamiento del subtítulo abarcando las 3 columnas (columnspan=3) en la fila 0
+        self.subTituloConversiones.grid(row=0, column=0, columnspan=3, sticky="nsew", padx=5, pady=5)
+        # Posicionamiento de instrucciones abarcando las 3 columnas en la fila 1
+        self.indicacionesConversiones.grid(row=1, column=0, columnspan=3, sticky="nsew", padx=5, pady=5)
+        # Posicionamiento de botón RGB en fila 2, columna 0 con expansión y márgenes
+        self.botonModeloGris.grid(row=2, column=0, sticky="nsew", padx=5, pady=5)
+        # Posicionamiento de botón HSV en fila 2, columna 1 con las mismas características
+        self.botonModeloUmbralizarFijo.grid(row=2, column=1, sticky="nsew", padx=5, pady=5)
+        # Posicionamiento de botón CMY en fila 2, columna 2 completando la fila horizontal
+        self.botonModeloUmbralizarAdaptativo.grid(row=2, column=2, sticky="nsew", padx=5, pady=5)
+
+    def convertirGris(self):
+        if not self.imagen:
+            messagebox.showwarning("Atención", "Primero carga una imagen.")
+            return
+        
+        self.marcoGris = ttk.Labelframe(self.panelVisualizacion, text="Imagen en escala de gris", padding=10, bootstyle="success")
+        self.marcoGris.grid(row=4, column=0, sticky="nsew", padx=5, pady=5)
+        self.marcoGris.columnconfigure(0, weight=1)
+        self.marcoGris.rowconfigure(0, weight=1)
+        self.subImagenGris = ttk.Label(self.marcoGris, text="Imagen en escala de grises", font=("Arial", 16, "bold"))
+        self.subImagenGris.grid(row=0, column=0, sticky="nsew", padx=5, pady=5)
+        imagenGrisPillow = self.imagen.obtenerImagenGris()
+        if imagenGrisPillow:
+            self.subImagenGris.configure(image=imagenGrisPillow)
+            self.subImagenGris.image = imagenGrisPillow
+        else:
+            messagebox.showerror("Error", "No se pudo convertir la imagen a escala de grises.")
+
+    def convertirUmbralizarFijo(self):
+        if not self.imagen:
+            messagebox.showwarning("Atención", "Primero carga una imagen.")
+            return
+        self.marcoUmbralizacionFijo = ttk.Labelframe(self.panelVisualizacion, text="Imagen umbralizada con fijo", padding=10, bootstyle="success")
+        self.marcoUmbralizacionFijo.grid(row=5, column=0, sticky="nsew", padx=5, pady=5)
+        self.marcoUmbralizacionFijo.columnconfigure(0, weight=1)
+        self.marcoUmbralizacionFijo.rowconfigure(0, weight=1)
+        self.SubImagenUmbralFijo = ttk.Label(self.marcoUmbralizacionFijo, text="Imagen umbralizada con fijo", font=("Arial", 16, "bold"))
+        self.SubImagenUmbralFijo.grid(row=0, column=0, sticky="nsew", padx=5, pady=5)
+        imagenUmbralizadaFijo = self.imagen.obtenerUmbralizacionFija()
+        if imagenUmbralizadaFijo:
+            self.SubImagenUmbralFijo.configure(image=imagenUmbralizadaFijo)
+            self.SubImagenUmbralFijo.image = imagenUmbralizadaFijo
+        else:
+            messagebox.showerror("Error", "No se pudo aplicar la umbralización fija.")
+
+    def convertirUmbralizarAdaptativo(self):
+        pass
+
     # Método para crear el área de visualización de resultados en el panel derecho
     def crearMuestraResultado(self):
         # Creación de Labelframe con estilo "info" (azul claro) para contener la visualización principal
@@ -235,8 +306,8 @@ class Interfaz(ttk.Window):
 
         # Separación de la imagen en sus canales RGB usando OpenCV split
         R, G, B = cv2.split(self.imagen.imagenCv)
-        # Creación de figura matplotlib con dimensiones específicas (12x3.8 pulgadas, 100 DPI)
-        fig = Figure(figsize=(12, 3.8), dpi=100)
+        # Creación de figura matplotlib con dimensiones específicas ampliadas (16x7 pulgadas, 100 DPI)
+        fig = Figure(figsize=(16, 7), dpi=100)
         # Creación de 3 subplots horizontales (1 fila, 3 columnas) para cada canal
         ax1 = fig.add_subplot(1, 3, 1)  # Subplot para canal rojo
         ax2 = fig.add_subplot(1, 3, 2)  # Subplot para canal verde
