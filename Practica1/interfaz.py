@@ -211,21 +211,7 @@ class Interfaz(ttk.Window):
             messagebox.showerror("Error", "No se pudo convertir la imagen a escala de grises.")
 
     def convertirUmbralizarFijo(self):
-        if not self.imagen:
-            messagebox.showwarning("Atención", "Primero carga una imagen.")
-            return
-        self.marcoUmbralizacionFijo = ttk.Labelframe(self.panelVisualizacion, text="Imagen umbralizada con fijo", padding=10, bootstyle="success")
-        self.marcoUmbralizacionFijo.grid(row=5, column=0, sticky="nsew", padx=5, pady=5)
-        self.marcoUmbralizacionFijo.columnconfigure(0, weight=1)
-        self.marcoUmbralizacionFijo.rowconfigure(0, weight=1)
-        self.SubImagenUmbralFijo = ttk.Label(self.marcoUmbralizacionFijo, text="Imagen umbralizada con fijo", font=("Arial", 16, "bold"))
-        self.SubImagenUmbralFijo.grid(row=0, column=0, sticky="nsew", padx=5, pady=5)
-        imagenUmbralizadaFijo = self.imagen.obtenerUmbralizacionFija()
-        if imagenUmbralizadaFijo:
-            self.SubImagenUmbralFijo.configure(image=imagenUmbralizadaFijo)
-            self.SubImagenUmbralFijo.image = imagenUmbralizadaFijo
-        else:
-            messagebox.showerror("Error", "No se pudo aplicar la umbralización fija.")
+        pass
 
     def convertirUmbralizarAdaptativo(self):
         pass

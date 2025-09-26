@@ -96,7 +96,7 @@ class Imagen:
             messagebox.showerror("Error", f"Ocurrió un error inesperado de tipo: {e}")
             return False
 
-    def obtenerImagenGris(self):
+    def obtenerImagenGris(self, modo= "Tk"):
         # Verificación de que la imagen en formato OpenCV esté cargada
         try:
             if self.imagenCv is not None:
@@ -109,34 +109,15 @@ class Imagen:
                         gris = int(0.299 * self.imagenCv[i, j, 0] + 0.587 * self.imagenCv[i, j, 1] + 0.114 * self.imagenCv[i, j, 2])
 
                         imagenGris[i, j] = gris
-                imagenGrisPillow = ImagenPillow.fromarray(imagenGris)
-                imagenGrisPillow.thumbnail((1400,600), ImagenPillow.LANCZOS)
-                return ImageTk.PhotoImage(imagenGrisPillow)
+                if modo == "Tk":
+                    imagenGrisPillow = ImagenPillow.fromarray(imagenGris)
+                    imagenGrisPillow.thumbnail((1400,600), ImagenPillow.LANCZOS)
+                    return ImageTk.PhotoImage(imagenGrisPillow)
+                else:
+                    return imagenGris
             else:
                 messagebox.showerror("Error", "La imagen no ha sido cargada correctamente.")
             return None
         except Exception as e:
             messagebox.showerror("Error", f"Ocurrió un error inesperado de tipo: {e}")
-            return None
-    
-    def obtenerUmbralizacionFija(self, umbral=170):
-        # Verificación de que la imagen en formato OpenCV esté cargada
-        if self.imagenCv is not None:
-            # Conversión de la imagen a escala de grises usando cv2.cvtColor
-            imagenGris = cv2.cvtColor(self.imagenCv, cv2.COLOR_RGB2GRAY)
-            alto, ancho = imagenGris.shape[0], imagenGris.shape[1]
-            imagenBlancoNegro = np.zeros((alto, ancho), dtype=np.uint8)
-            for i in range(alto):
-                for j in range(ancho):
-                    # Aplicación del umbral para binarización:
-                    # Si el valor de gris es mayor o igual al umbral, se asigna 255 (blanco), sino 0 (negro)
-                    if imagenGris[i, j] <= umbral:
-                        imagenBlancoNegro[i, j] = 255
-                    else:
-                        imagenBlancoNegro[i, j] = 0
-                    imagenBlancoNegroPillow = ImagenPillow.fromarray(imagenBlancoNegro)
-                    imagenBlancoNegroPillow.thumbnail((1400,600), ImagenPillow.LANCZOS)
-                    return ImageTk.PhotoImage(imagenBlancoNegroPillow)
-        else:
-            messagebox.showerror("Error", "La imagen no ha sido cargada correctamente.")
             return None
