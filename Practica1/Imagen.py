@@ -63,6 +63,7 @@ class Imagen:
     def histogramaGris(self):
         imagenGris = self.obtenerImagenGris(modo="Data")
         valor, frecuencia = np.unique(imagenGris, return_counts=True)
+        return valor, frecuencia
 
     def histogramaColor(self):
         if self.imagenCv is not None:
