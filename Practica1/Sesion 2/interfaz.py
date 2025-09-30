@@ -1,3 +1,25 @@
+"""
+===============================================================================
+                            DERECHOS DE AUTOR
+===============================================================================
+© 2025 - Práctica 1: Modelos de Color
+Autor: Zaddkiel de Jesus Martinez Alor,Herrera Monroy Abraham Andre, Marcelino Lopez Jessica
+Materia: Procesamiento De Imagenes
+Semestre: Cuarto Semestre
+Institución: Escuela Superior de Cómputo, Instituto Politécnico Nacional
+
+Descripción: 
+Aplicación de interfaz gráfica para visualización y análisis de diferentes 
+modelos de color (RGB, HSV, CMY) usando ttkbootstrap, OpenCV y matplotlib.
+
+Este código es de uso académico y está protegido por derechos de autor.
+Prohibida su reproducción parcial o total sin autorización del autor.
+
+Fecha de creación: Septiembre 2025
+Versión: 1.0
+===============================================================================
+"""
+
 # Importación de ttkbootstrap para crear interfaces gráficas modernas con temas
 import ttkbootstrap as ttk
 # Importación duplicada (error) - se puede eliminar esta línea

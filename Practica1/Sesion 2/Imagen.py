@@ -161,3 +161,39 @@ class Imagen:
             alto, ancho = self.imagenCv.shape[0], self.imagenCv.shape[1]
             # NOTA: Este método parece estar incompleto - falta la implementación
             pass
+
+    def calcularPropiedadesImagenRGB(self):
+        # Verifica si la imagen OpenCV ha sido cargada correctamente
+        if self.imagenCv is not None:
+            # Separa la imagen en sus tres canales de color usando OpenCV
+            canalR, canalG, canalB = cv2.split(self.imagenCv)
+            resultadosPorCanal = []
+            # Calcula propiedades estadísticas para cada canal de color
+            for canal in [canalR, canalG, canalB]:
+                # Aplanar la matriz para análisis lineal
+                pixels = canal.flatten()
+                N = len(pixels)  # Número total de píxeles
+                unico, conteo = np.unique(pixels, return_counts=True)
+                probabilidad = conteo / N
+                media = np.sum(unico * probabilidad)
+                entropia = -np.sum(probabilidad * np.log2(probabilidad))
+                varianza = np.sum(((unico - media) ** 2) * probabilidad)
+                asimetria = np.sum(((unico - media) ** 3) * probabilidad)
+                energia = np.sum(probabilidad ** 2)
+                listaPropiedades = [media, entropia, varianza, asimetria, energia]
+                resultadosPorCanal.append(listaPropiedades)
+            return resultadosPorCanal
+    
+    def calcularPropiedadesImagenGris(self):
+        if self.imagenCv is not None:
+            matrizGris = self.obtenerImagenGris(modo="Data")
+            pixels = matrizGris.flatten()
+            N = len(pixels)
+            unico, conteo = np.unique(pixels, return_counts=True)
+            probabilidad = conteo / N
+            media = np.sum(unico * probabilidad)
+            entropia = -np.sum(probabilidad * np.log2(probabilidad))
+            varianza = np.sum(((unico - media) ** 2) * probabilidad)
+            asimetria = np.sum(((unico - media) ** 3) * probabilidad)
+            energia = np.sum(probabilidad ** 2)
+            return [media, entropia, varianza, asimetria, energia]
