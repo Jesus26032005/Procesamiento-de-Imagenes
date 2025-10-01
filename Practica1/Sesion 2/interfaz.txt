@@ -1,0 +1,146 @@
+CLASE Interfaz:
+    // PROPIEDADES (Atributos de la Interfaz)
+    Imagen: Objeto de la Clase Imagen (instancia para la imagen cargada).
+    PanelControl: Marco de la izquierda para botones y controles.
+    PanelVisualizacion: Marco de la derecha con scroll para mostrar resultados.
+    
+    // Marcos dinámicos para resultados:
+    MarcoGris, MarcoRGB, MarcoHSV, MarcoCMY, 
+    MarcoHistogramaGrises, MarcoHistograma, 
+    MarcoBinarizadaFijo, MarcoBinarizadaAdaptativo.
+
+    // CONSTRUCTOR
+    FUNCION INICIAR():
+        Inicializar Imagen a NULO.
+        Llamar a configuracionesIniciales().
+        Llamar a crearLayout().
+        Iniciar el bucle principal de la aplicación (mainloop).
+
+    // MÉTODOS DE CONFIGURACIÓN DE LA VENTANA
+    FUNCION configuracionesIniciales():
+        Configurar la ventana principal (ttk.Window) con el tema "solar".
+        Establecer el título ("Practica 1").
+        Fijar el tamaño (1600x900) y hacerla no redimensionable.
+        Configurar el grid: Columna 0 (Control) fija, Columna 1 (Visualización) se expande.
+
+    FUNCION crearLayout():
+        Crear y posicionar PanelControl (Marco en Columna 0).
+        Crear y posicionar PanelVisualizacion (ScrolledFrame en Columna 1).
+        Crear el título principal del PanelControl.
+        Llamar a métodos para construir las secciones de control:
+            - crearMuestraResultado()
+            - crearControlesCargarImagen()
+            - crearControlesMostrarModelos()
+            - crearControlesGrisBinarizacion()
+            - crearControlesHistograma()
+
+    // MÉTODOS PARA CONSTRUIR SECCIONES DEL PANEL DE CONTROL
+    FUNCION crearControlesCargarImagen():
+        Crear Labelframe "Cargar Imagen" (estilo "primary").
+        Añadir etiquetas de título e indicaciones.
+        Añadir Botón "Cargar Imagen" (llama a cargarImagen).
+
+    FUNCION crearControlesMostrarModelos():
+        Crear Labelframe "Elegir Modelo a mostrar" (estilo "secondary").
+        Añadir etiquetas de título e indicaciones.
+        Añadir botones: "Modelo RGB" (llama a cargarModeloRGB), "Modelo HSV" (llama a cargarModeloHSV), "Modelo CMY" (llama a cargarModeloCMY).
+
+    FUNCION crearControlesGrisBinarizacion():
+        Crear Labelframe "Conversion de gris-binario" (estilo "success").
+        Añadir etiquetas de título e indicaciones.
+        Añadir botones: "Convertir a escala de gris" (llama a convertirEscalaGris), "Binarizar imagen por fijo" (llama a binarizarImagenFijo), "Binarizar imagen por adaptativo" (llama a binarizarImagenAdaptativo).
+
+    FUNCION crearControlesHistograma():
+        Crear Labelframe "Elegir histograma a mostrar" (estilo "danger").
+        Añadir etiquetas de título e indicaciones.
+        Añadir botones: "Histograma de color" (llama a crearHistogramaRGB), "Histograma de gris" (llama a crearHistogramaGris).
+
+    FUNCION crearMuestraResultado():
+        Crear Labelframe "Visualización de la imagen" en PanelVisualizacion.
+        Añadir etiquetas de título.
+        Añadir Etiqueta SubImagen (donde se mostrará la imagen principal).
+
+    // MÉTODOS DE FUNCIONALIDADES (Lógica de Eventos)
+
+    FUNCION cargarImagen():
+        Abrir diálogo para seleccionar un archivo de imagen.
+        SI rutaArchivo seleccionada:
+            SI ya existe una imagen cargada:
+                Destruir/eliminar todos los marcos de resultado dinámicos previos (MarcoGris, MarcoRGB, etc.).
+                Mover el scroll del panel de visualización al inicio.
+            Crear nueva instancia de Imagen(rutaArchivo).
+            Llamar a imagen.iniciarImagen() para obtener imagenTkinter (redimensionada).
+            SI imagenTkinter VÁLIDA:
+                Mostrar imagenTkinter en la etiqueta SubImagen.
+            SINO (si falla la carga/conversión):
+                Eliminar la instancia de Imagen.
+        SINO:
+            Mostrar advertencia.
+
+    FUNCION convertirEscalaGris():
+        SI NO hay Imagen: Mostrar advertencia y SALIR.
+        Crear MarcoGris en PanelVisualizacion.
+        Llamar a imagen.obtenerImagenGris() y mostrar el resultado en MarcoGris.
+
+    FUNCION binarizarImagenFijo():
+        SI NO hay Imagen O MarcoGris O MarcoHistogramaGrises: Mostrar advertencia de requisito y SALIR.
+        Pedir al usuario el valor del Umbral Fijo (0-255).
+        SI valorUmbralFijo ingresado:
+            Llamar a imagen.umbralizarFijoImagen(valorUmbralFijo).
+            Crear MarcoBinarizadaFijo y mostrar la imagen binarizada.
+
+    FUNCION binarizarImagenAdaptativo():
+        SI NO hay Imagen O MarcoGris O MarcoHistogramaGrises: Mostrar advertencia de requisito y SALIR.
+        Pedir al usuario el valor de la Constante C (-20 a 20).
+        SI valorConstante ingresado:
+            Llamar a imagen.umbralizarAdaptativoImagen(valorConstante).
+            Crear MarcoBinarizadaAdaptativo y mostrar la imagen binarizada.
+
+    FUNCION crearHistogramaRGB():
+        SI NO hay Imagen: Mostrar advertencia y SALIR.
+        Crear MarcoHistograma (para Histograma de Color).
+        Obtener datos de histograma y propiedades estadísticas (Media, Entropía, etc.) con imagen.histogramaColor() e imagen.calcularPropiedadesImagenRGB().
+        PARA CADA canal (R, G, B):
+            Crear Figura y Subplot de Matplotlib.
+            Dibujar gráfico de barras con el color del canal.
+            Integrar el gráfico en MarcoHistograma (FigureCanvasTkAgg).
+            Mostrar texto con las propiedades estadísticas del canal debajo del gráfico.
+
+    FUNCION crearHistogramaGris():
+        SI NO hay Imagen O MarcoGris no existe: Mostrar advertencia de requisito y SALIR.
+        Crear MarcoHistogramaGrises.
+        Obtener datos de histograma y propiedades con imagen.histogramaGris() e imagen.calcularPropiedadesImagenGris().
+        Crear Figura y Subplot de Matplotlib.
+        Dibujar gráfico de barras en color gris.
+        Integrar el gráfico en MarcoHistogramaGrises.
+        Mostrar texto con las propiedades estadísticas debajo del gráfico.
+
+    FUNCION cargarModeloRGB():
+        SI NO hay Imagen: Mostrar advertencia y SALIR.
+        Crear MarcoRGB.
+        Separar canales R, G, B de imagen.imagenCv (cv2.split).
+        Crear Figura de Matplotlib con 3 subplots.
+        Mostrar cada canal (imshow) usando los mapas de color "Reds", "Greens" y "Blues".
+        Integrar el gráfico en MarcoRGB.
+
+    FUNCION cargarModeloHSV():
+        SI NO hay Imagen: Mostrar advertencia y SALIR.
+        Crear MarcoHSV.
+        Convertir imagen.imagenCv de RGB a HSV (cv2.cvtColor).
+        Separar canales H, S, V (cv2.split).
+        Crear Figura de Matplotlib con 3 subplots.
+        Mostrar cada canal (imshow) con mapas de color apropiados ("hsv" para H, "gray" para S y V).
+        Integrar el gráfico en MarcoHSV.
+
+    FUNCION cargarModeloCMY():
+        SI NO hay Imagen: Mostrar advertencia y SALIR.
+        Crear MarcoCMY.
+        Separar canales R, G, B.
+        Calcular C = 255 - R, M = 255 - G, Y = 255 - B.
+        Crear Figura de Matplotlib con 3 subplots.
+        Mostrar cada canal (imshow) con mapas de color sugeridos ("Blues", "Purples", "Oranges").
+        Integrar el gráfico en MarcoCMY.
+
+// PUNTO DE ENTRADA
+SI el script es el programa principal:
+    Crear instancia de Interfaz().

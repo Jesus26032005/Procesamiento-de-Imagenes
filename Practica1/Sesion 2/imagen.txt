@@ -1,0 +1,89 @@
+CLASE Imagen:
+    // PROPIEDADES (Atributos)
+    ImagenCV: Matriz de imagen en formato OpenCV (RGB).
+    ImagenGris: Matriz de imagen en escala de grises.
+    CanalesRGB: Lista con las matrices separadas de los canales R, G, B.
+    Alto, Ancho: Dimensiones de la imagen.
+    Ruta: Dirección del archivo de la imagen.
+
+    // CONSTRUCTOR
+    FUNCION INICIAR(rutaArchivo = NULO):
+        Establecer Ruta.
+        Inicializar ImagenCV, ImagenGris, CanalesRGB, Alto, Ancho a NULO.
+
+    // MÉTODOS DE CONVERSIÓN Y CARGA
+    FUNCION convertirImagenTK(imagenCV):
+        Redimensionar imagenCV a un tamaño máximo (1400x600) usando LANCZOS.
+        Convertir la imagen redimensionada a formato ImageTk (para Tkinter).
+        RETORNAR imagenTk.
+
+    FUNCION iniciarImagen():
+        INTENTAR:
+            Abrir imagen desde Ruta con Pillow y convertir a "RGB".
+            Convertir imagen Pillow a un arreglo NumPy (ImagenCV).
+            Redimensionar imagen para visualización (previsualización).
+            Convertir la previsualización a ImageTk.
+            RETORNAR imagenTkinter.
+        EXCEPCIÓN (FileNotFoundError, UnidentifiedImageError, OSError, etc.):
+            Mostrar un mensaje de error apropiado.
+            RETORNAR FALSO.
+
+    FUNCION obtenerImagenGris():
+        SI ImagenCV NO ES NULO:
+            Obtener Alto y Ancho.
+            Inicializar ImagenGris como una matriz de ceros (uint8) del tamaño de la imagen.
+            PARA CADA pixel (i, j) en ImagenCV:
+                Calcular valorGris = 0.299*R + 0.587*G + 0.114*B (Fórmula de luminancia).
+                Asignar valorGris a ImagenGris[i, j].
+            RETORNAR convertirImagenTK(ImagenGris).
+
+    // MÉTODOS DE HISTOGRAMA
+    FUNCION histogramaGris():
+        Calcular valores únicos y frecuencias de ImagenGris (np.unique).
+        RETORNAR valores, frecuencias.
+
+    FUNCION histogramaColor():
+        Dividir ImagenCV en CanalesRGB (cv2.split).
+        ListaValores = []
+        PARA CADA canal en CanalesRGB:
+            Calcular valores únicos y frecuencias del canal (np.unique).
+            Agregar (valores, frecuencias) a ListaValores.
+        RETORNAR ListaValores.
+
+    // MÉTODOS DE PROPIEDADES ESTADÍSTICAS
+    FUNCION calcularPropiedadesImagenRGB():
+        ResultadosPorCanal = []
+        PARA CADA canal en CanalesRGB:
+            Calcular N (total de píxeles), valores únicos, conteo y probabilidad.
+            Calcular Media, Entropía, Varianza, Asimetría y Energía.
+            Agregar lista de propiedades a ResultadosPorCanal.
+        RETORNAR ResultadosPorCanal.
+
+    FUNCION calcularPropiedadesImagenGris():
+        Calcular N, valores únicos, conteo y probabilidad de ImagenGris.
+        Calcular Media, Entropía, Varianza, Asimetría y Energía.
+        RETORNAR lista de propiedades.
+
+    // MÉTODOS DE BINARIZACIÓN
+    FUNCION umbralizarFijoImagen(umbral):
+        ImagenUmbralizada = Matriz (donde ImagenGris >= umbral es 255, sino 0).
+        RETORNAR convertirImagenTK(ImagenUmbralizada).
+
+    FUNCION calcularVecindad(x, y):
+        ListaVecindad = []
+        PARA i DE x-2 A x+2:
+            PARA j DE y-2 A y+2:
+                SI (i, j) está dentro de los límites de la imagen Y NO es (x, y):
+                    Agregar valor de ImagenGris[i, j] a ListaVecindad.
+        RETORNAR ListaVecindad.
+
+    FUNCION umbralizarAdaptativoImagen(C):
+        ImagenUmbralizada = Matriz de ceros.
+        PARA CADA pixel (i, j) en ImagenGris (excluyendo bordes):
+            Vecindad = calcularVecindad(i, j).
+            UmbralLocal = media(Vecindad) - C.
+            SI ImagenGris[i, j] >= UmbralLocal:
+                ImagenUmbralizada[i, j] = 255.
+            SINO:
+                ImagenUmbralizada[i, j] = 0.
+        RETORNAR convertirImagenTK(ImagenUmbralizada).
