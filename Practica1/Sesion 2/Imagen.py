@@ -7,18 +7,24 @@ class Imagen:
     def __init__(self, ruta=None):
         self.imagenCv = None
         self.imagenGris= None
+        self.canalesRGB = None
         self.alto = None
         self.ancho = None
         self.ruta = ruta
 
+    def convertirImagenTK(self, imagenCV):
+        max_dimension = (1400, 600)
+        imagenPil = ImagenPillow.fromarray(imagenCV)
+        imagenPil.thumbnail(max_dimension, ImagenPillow.LANCZOS)
+        return ImageTk.PhotoImage(imagenPil)
+
     def iniciarImagen(self):
         try:
-            self.imagenPil = ImagenPillow.open(self.ruta).convert("RGB")
-            self.imagenCv = np.array(self.imagenPil)
+            imagenPil = ImagenPillow.open(self.ruta).convert("RGB")
+            self.imagenCv = np.array(imagenPil)
             max_dimension = (1400, 600)
-            imagenAuxiliada = self.imagenPil.copy()
+            imagenAuxiliada = imagenPil.copy()
             imagenAuxiliada.thumbnail(max_dimension, ImagenPillow.LANCZOS)
-
             return ImageTk.PhotoImage(imagenAuxiliada)
         except FileNotFoundError:
             messagebox.showerror("Error", "No se encontró la imagen en la ruta especificada.")
@@ -39,79 +45,69 @@ class Imagen:
             messagebox.showerror("Error", f"Ocurrió un error inesperado de tipo: {e}")
             return False
     
-    def obtenerImagenGris(self, modo= "TK"):
-        try:
-            if self.imagenCv is not None:
-                alto,ancho = self.imagenCv.shape[0], self.imagenCv.shape[1]
-                imagenGris = np.zeros((alto, ancho), dtype=np.uint8)
-                for i in range(alto):
-                    for j in range(ancho):
-                        gris = int(0.299 * self.imagenCv[i, j, 0] + 0.587 * self.imagenCv[i, j, 1] + 0.114 * self.imagenCv[i, j, 2])
-
-                        imagenGris[i, j] = gris
-                if modo == "TK":
-                    imagenGrisPillow = ImagenPillow.fromarray(imagenGris)
-                    imagenGrisPillow.thumbnail((1400,600), ImagenPillow.LANCZOS)
-                    return ImageTk.PhotoImage(imagenGrisPillow)
-                else:
-                    return imagenGris
-            else:
-                messagebox.showerror("Error", "La imagen no ha sido cargada correctamente.")
-            return None
-        except Exception as e:
-            messagebox.showerror("Error", f"Ocurrió un error inesperado de tipo: {e}")
-            return None
-
+    def obtenerImagenGris(self):
+        if self.imagenCv is not None:
+            self.alto, self.ancho = self.imagenCv.shape[0], self.imagenCv.shape[1]
+            self.imagenGris = np.zeros((self.alto, self.ancho), dtype=np.uint8)
+            for i in range(self.alto):
+                for j in range(self.ancho):
+                    valorGris = int(0.299 * self.imagenCv[i, j, 0] + 0.587 * self.imagenCv[i, j, 1] + 0.114 * self.imagenCv[i, j, 2])
+                    self.imagenGris[i, j] = valorGris
+            return self.convertirImagenTK(self.imagenGris)
+    
     def histogramaGris(self):
-        imagenGris = self.obtenerImagenGris(modo="Data")
-        valor, frecuencia = np.unique(imagenGris, return_counts=True)
+        valor, frecuencia = np.unique(self.imagenGris, return_counts=True)
         return valor, frecuencia
 
     def histogramaColor(self):
+        self.canalesRGB = cv2.split(self.imagenCv)
+        listaValores = []
         if self.imagenCv is not None:
-            canalR, canalG, canalB = cv2.split(self.imagenCv)
-            valorR, frecuenciaR = np.unique(canalR, return_counts=True)
-            valorG, frecuenciaG = np.unique(canalG, return_counts=True)
-            valorB, frecuenciaB = np.unique(canalB, return_counts=True)
-            return (valorR, frecuenciaR), (valorG, frecuenciaG), (valorB, frecuenciaB)
+            for canal in self.canalesRGB:
+                valor, frecuencia = np.unique(canal, return_counts=True)
+                listaValores.append((valor, frecuencia))
+            return listaValores
 
-    def obtenerHistogramaGris(self):
-        if self.imagenCv is not None:
-            alto, ancho = self.imagenCv.shape[0], self.imagenCv.shape[1]
-            pass
+    def calcularHistograma(self, matriz):
+        histograma = []
+        for canal in matriz:
+            valor, frecuencia = np.unique(canal, return_counts=True)
+            histograma.append((valor, frecuencia))
+        return histograma
 
     def calcularPropiedadesImagenRGB(self):
-        if self.imagenCv is not None:
-            canalR, canalG, canalB = cv2.split(self.imagenCv)
-            resultadosPorCanal = []
-            for canal in [canalR, canalG, canalB]:
-                pixels = canal.flatten()
-                N = len(pixels)
-                unico, conteo = np.unique(pixels, return_counts=True)
-                probabilidad = conteo / N
-                media = float(np.sum(unico * probabilidad))
-                entropia = float(-np.sum(probabilidad * np.log2(probabilidad)))
-                varianza = float(np.sum(((unico - media) ** 2) * probabilidad))
-                asimetria = float(np.sum(((unico - media) ** 3) * probabilidad))
-                energia = float(np.sum(probabilidad ** 2))
-                listaPropiedades = [media, entropia, varianza, asimetria, energia]
-                resultadosPorCanal.append(listaPropiedades)
-                
-            return resultadosPorCanal
-    
-    def calcularPropiedadesImagenGris(self):
-        if self.imagenCv is not None:
-            matrizGris = self.obtenerImagenGris(modo="Data")
-            pixels = matrizGris.flatten()
+        resultadosPorCanal = []
+        for canal in self.canalesRGB:
+            pixels = canal.flatten()
             N = len(pixels)
             unico, conteo = np.unique(pixels, return_counts=True)
             probabilidad = conteo / N
-            media = np.sum(unico * probabilidad)
-            entropia = -np.sum(probabilidad * np.log2(probabilidad))
-            varianza = np.sum(((unico - media) ** 2) * probabilidad)
-            asimetria = np.sum(((unico - media) ** 3) * probabilidad)
-            energia = np.sum(probabilidad ** 2)
-            return [media, entropia, varianza, asimetria, energia]
+            media = float(np.sum(unico * probabilidad))
+            entropia = float(-np.sum(probabilidad * np.log2(probabilidad)))
+            varianza = float(np.sum(((unico - media) ** 2) * probabilidad))
+            asimetria = float(np.sum(((unico - media) ** 3) * probabilidad))
+            energia = float(np.sum(probabilidad ** 2))
+            listaPropiedades = [media, entropia, varianza, asimetria, energia]
+            resultadosPorCanal.append(listaPropiedades)
+        return resultadosPorCanal
+    
+    def calcularPropiedadesImagenGris(self):
+        pixels = self.imagenGris.flatten()
+        N = len(pixels)
+        unico, conteo = np.unique(pixels, return_counts=True)
+        probabilidad = conteo / N
+        media = np.sum(unico * probabilidad)
+        entropia = -np.sum(probabilidad * np.log2(probabilidad))
+        varianza = np.sum(((unico - media) ** 2) * probabilidad)
+        asimetria = np.sum(((unico - media) ** 3) * probabilidad)
+        energia = np.sum(probabilidad ** 2)
+        return [media, entropia, varianza, asimetria, energia]
     
     def umbralizarFijoImagen(self, umbral):
-        pass
+        imagenUmbralizada = np.where(self.imagenGris >= umbral, 255, 0).astype(np.uint8)
+        return self.convertirImagenTK(imagenUmbralizada)
+    
+    def umbralizarAdaptativoImagenMedia(self, C):
+        for i in range(1, self.alto - 1):
+            for j in range(1, self.ancho - 1):
+                pass

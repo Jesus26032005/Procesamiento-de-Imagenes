@@ -2,10 +2,11 @@ import ttkbootstrap as ttk
 import ttkbootstrap as ttk
 from ttkbootstrap.constants import *
 from ttkbootstrap.scrolled import ScrolledFrame
-from tkinter import filedialog, messagebox
+from tkinter import filedialog, messagebox, simpledialog
 from Imagen import Imagen as Img
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+from matplotlib.ticker import MultipleLocator
 import cv2
 
 class Interfaz(ttk.Window):
@@ -21,14 +22,13 @@ class Interfaz(ttk.Window):
         self.geometry("1600x900")
         self.resizable(False,False)
 
-        for i in range(10): self.rowconfigure(i, weight=1)
         self.columnconfigure(0, weight=0)
         self.columnconfigure(1, weight=1)
 
     def crearLayout(self):
         self.panelControl = ttk.Frame(self, padding=10, bootstyle="DARK", width=400)
         self.panelControl.grid(row=0, column=0, sticky="nsew", rowspan=10)
-        for i in range(8): self.panelControl.rowconfigure(i, weight=1)
+        for i in range(4): self.panelControl.rowconfigure(i, weight=1)
         self.panelControl.columnconfigure(0, weight=1)
 
         self.labelTitulo = ttk.Label(self.panelControl, text="Practica 1: Modelos de color", font=("Arial", 16, "bold"))
@@ -44,32 +44,20 @@ class Interfaz(ttk.Window):
         self.crearControlesGrisBinarizacion()
         self.crearControlesHistograma()
 
-    # Método para crear la sección de controles para cargar imágenes
     def crearControlesCargarImagen(self):
-        # Define el estilo visual "primary" (generalmente azul) para esta sección
         estiloCargarImg = "primary"
-        # Crea un marco con etiqueta (Labelframe) para agrupar los controles de carga
         self.marcoCargarImagen = ttk.Labelframe(self.panelControl, text="Cargar Imagen", padding=10, bootstyle=estiloCargarImg)
-        # Coloca el marco en la fila 1 del panel de control
         self.marcoCargarImagen.grid(row=1, column=0, sticky="nsew", padx=5, pady=5, rowspan=1)
-        # Configura 3 filas dentro del marco para que se expandan uniformemente
         for i in range(3):
             self.marcoCargarImagen.rowconfigure(i, weight=1)
-        # Configura la columna del marco para que se expanda
         self.marcoCargarImagen.columnconfigure(0, weight=1)
         
-        # Crea etiqueta con subtítulo para la sección (fuente Arial 12 en negrita)
         self.subTituloCargar = ttk.Label(self.marcoCargarImagen, text="Cargar una imagen desde su dispositivo", font=("Arial", 12, "bold"))
-        # Crea etiqueta con indicaciones para el usuario (fuente Arial 10)
         self.indicacionesCargar = ttk.Label(self.marcoCargarImagen, text="Seleccione una imagen para cargarla en la aplicación", font=("Arial", 10))
-        # Crea botón para cargar imagen que ejecuta el método cargarImagen al hacer clic
         self.botonCargar = ttk.Button(self.marcoCargarImagen, text="Cargar Imagen", bootstyle=estiloCargarImg, command=self.cargarImagen)
         
-        # Coloca el subtítulo en la fila 0 del marco
         self.subTituloCargar.grid(row=0, column=0, sticky="nsew", padx=5, pady=5)
-        # Coloca las indicaciones en la fila 1 del marco
         self.indicacionesCargar.grid(row=1, column=0, sticky="nsew", padx=5, pady=5)
-        # Coloca el botón en la fila 2 del marco
         self.botonCargar.grid(row=2, column=0, sticky="nsew", padx=5, pady=5)
 
     def crearControlesMostrarModelos(self):
@@ -96,17 +84,20 @@ class Interfaz(ttk.Window):
         self.marcoConversiones = ttk.Labelframe(self.panelControl, text="Elegir cambio a mostrar", padding=10, bootstyle=estiloConversiones)
         self.marcoConversiones.grid(row=3, column=0, sticky="nsew", padx=5, pady=5)
         for i in range(2): self.marcoConversiones.columnconfigure(i, weight=1)
-        for i in range(3):self.marcoConversiones.rowconfigure(i, weight=1)
+        for i in range(4):self.marcoConversiones.rowconfigure(i, weight=1)
 
         self.subTituloConversiones = ttk.Label(self.marcoConversiones, text="Conversion de gris-binario", font=("Arial", 12, "bold"))
         self.indicacionesConversiones = ttk.Label(self.marcoConversiones, text="Seleccione un modelo de color para visualizarlo", font=("Arial", 10))
+        
         self.botonModeloGris = ttk.Button(self.marcoConversiones, text="Convertir a escala de gris", bootstyle=estiloConversiones, command=self.convertirEscalaGris)
-        self.binarizar = ttk.Button(self.marcoConversiones, text="Binarizar imagen", bootstyle=estiloConversiones, command=self.binarizarImagen, state=DISABLED)
+        self.botonUmbralFijo = ttk.Button(self.marcoConversiones, text="Binarizar imagen por fijo", bootstyle=estiloConversiones, command=self.binarizarImagenFijo)
+        self.botonUmbralAdaptativo = ttk.Button(self.marcoConversiones, text="Binarizar imagen por adaptativo", bootstyle=estiloConversiones, state=DISABLED)
 
         self.subTituloConversiones.grid(row=0, column=0, columnspan=3, sticky="nsew", padx=5, pady=5)
         self.indicacionesConversiones.grid(row=1, column=0, columnspan=3, sticky="nsew", padx=5, pady=5)
-        self.botonModeloGris.grid(row=2, column=0, sticky="nsew", padx=5, pady=5)
-        self.binarizar.grid(row=2, column=1, sticky="nsew", padx=5, pady=5)
+        self.botonModeloGris.grid(row=2, column=0, sticky="nsew", padx=5, pady=5, columnspan=2)
+        self.botonUmbralFijo.grid(row=3, column=0, sticky="nsew", padx=5, pady=5)
+        self.botonUmbralAdaptativo.grid(row=3, column=1, sticky="nsew", padx=5, pady=5)
 
     def crearControlesHistograma(self):
         estiloHistograma = "danger"
@@ -125,6 +116,7 @@ class Interfaz(ttk.Window):
         self.botonHistogramaColor.grid(row=2, column=0, sticky="nsew", padx=5, pady=5)
         self.botonHistogramaGris.grid(row=2, column=1, sticky="nsew", padx=5, pady=5)
 
+    # FUNCIONES DE CHAMBA
     def crearMuestraResultado(self):
         self.marcoMapa = ttk.Labelframe(self.panelVisualizacion, text="Visualización de la imagen", padding=10, bootstyle="info")
         self.marcoMapa.grid(row=0, column=0, sticky="nsew", padx=5, pady=5)
@@ -154,9 +146,44 @@ class Interfaz(ttk.Window):
         else:
             messagebox.showerror("Error", "No se pudo convertir la imagen a escala de grises.")
 
-    def binarizarImagen(self):
-        pass
-    
+    def binarizarImagenFijo(self):
+        if not self.imagen:
+            messagebox.showwarning("Atención", "Primero carga una imagen.")
+            return
+        elif not hasattr(self, 'marcoGris'):
+            messagebox.showwarning("Atención", "Primero convierte la imagen a escala de grises.")
+            return
+        elif not hasattr(self, 'marcoHistogramaGrises'):
+            messagebox.showwarning("Atención", "Requieres tener el histograma de grises para usar un umbral fijo.")
+
+        valorUmbralFijo = simpledialog.askinteger("Umbral Fijo", "Introduce el valor del umbral (0-255):", minvalue=0, maxvalue=255)
+        if valorUmbralFijo is not None:
+            imagenBinarizada= self.imagen.umbralizarFijoImagen(valorUmbralFijo)
+            self.marcoBinarizadaFijo = ttk.Labelframe(self.panelVisualizacion, text="Imagen binarizada (Umbral Fijo)", padding=10, bootstyle="success")
+            self.marcoBinarizadaFijo.grid(row=7, column=0, sticky="nsew", padx=5, pady=5)
+            self.marcoBinarizadaFijo.columnconfigure(0, weight=1)
+            self.marcoBinarizadaFijo.rowconfigure(0, weight=1)
+            self.subImagenBinarizadaFijo = ttk.Label(self.marcoBinarizadaFijo, text="Imagen binarizada (Umbral Fijo)", font=("Arial", 16, "bold"))
+            self.subImagenBinarizadaFijo.grid(row=0, column=0, sticky="nsew", padx=5, pady=5)
+            if imagenBinarizada:
+                self.subImagenBinarizadaFijo.configure(image=imagenBinarizada, anchor="center")
+                self.subImagenBinarizadaFijo.image = imagenBinarizada
+            else:
+                messagebox.showerror("Error", "No se pudo convertir la imagen a escala de grises.")
+
+    def binarizarImagenAdaptativo(self):
+        if not self.imagen:
+            messagebox.showwarning("Atención", "Primero carga una imagen.")
+            return
+        elif not hasattr(self, 'marcoGris'):
+            messagebox.showwarning("Atención", "Primero convierte la imagen a escala de grises.")
+            return
+        elif not hasattr(self, 'marcoHistogramaGrises'):
+            messagebox.showwarning("Atención", "Requieres tener el histograma de grises para usar un umbral fijo.")
+        valorConstante = simpledialog.askinteger("Constante", "Introduce el valor de la constante (recomendado 0-10, maximo 20):", minvalue=0, maxvalue=20)
+        if valorConstante is not None:
+            pass
+
     def cargarImagen(self):
         rutaArchivo= filedialog.askopenfilename(title="Seleccionar imagen", filetypes=[("Image files", "*.jpg *.jpeg *.png"), ("All files")])
         if rutaArchivo:
@@ -173,6 +200,8 @@ class Interfaz(ttk.Window):
                     self.marcoHistogramaGrises.destroy()
                 if hasattr(self, 'marcoHistograma') and self.marcoHistograma.winfo_exists():
                     self.marcoHistograma.destroy()
+                if hasattr(self, 'marcoBinarizadaFijo') and self.marcoBinarizadaFijo.winfo_exists():
+                    self.marcoBinarizadaFijo.destroy()
                 self.panelVisualizacion.yview_moveto(0)
 
             self.imagen = Img(rutaArchivo)
@@ -272,7 +301,8 @@ class Interfaz(ttk.Window):
         self.marcoHistograma.columnconfigure(0, weight=1); self.marcoHistograma.rowconfigure(1, weight=1)
         ttk.Label(self.marcoHistograma, text="Histograma RGB", font=("Arial", 16, "bold")).grid(row=0, column=0, sticky="w", padx=5, pady=5)
 
-        fig = Figure(figsize=(16, 9.5), dpi=100)
+
+        fig = Figure(figsize=(16,10), dpi=100)
         fig.subplots_adjust(hspace=0.4)
         ax1 = fig.add_subplot(3, 1, 1)
         ax2 = fig.add_subplot(3, 1, 2)
@@ -290,6 +320,12 @@ class Interfaz(ttk.Window):
         ax1.set_title("Histograma del canal R");
         ax2.set_title("Histograma del canal G");
         ax3.set_title("Histograma del canal B");
+        ax1.yaxis.set_major_locator(MultipleLocator(4000))
+        ax1.yaxis.grid(True, linestyle="--", alpha=0.7)
+        ax2.yaxis.set_major_locator(MultipleLocator(4000))
+        ax2.yaxis.grid(True, linestyle="--", alpha=0.7)
+        ax3.yaxis.set_major_locator(MultipleLocator(4000))
+        ax3.yaxis.grid(True, linestyle="--", alpha=0.7)
         canvas = FigureCanvasTkAgg(fig, master=self.marcoHistograma)
         canvas.draw()
         canvas.get_tk_widget().grid(row=1, column=0, sticky="nsew")
@@ -323,6 +359,8 @@ class Interfaz(ttk.Window):
         ax.set_xlabel("Intensidad de gris")
         ax.set_ylabel("Número de píxeles (Frecuencia)")
         ax.set_title("Histograma de escala de grises");
+        ax.yaxis.set_major_locator(MultipleLocator(2000))
+        ax.yaxis.grid(True, linestyle="--", alpha=0.7)
         canvas = FigureCanvasTkAgg(fig, master=self.marcoHistogramaGrises)
         canvas.draw()
         canvas.get_tk_widget().grid(row=1, column=0, sticky="nsew")
