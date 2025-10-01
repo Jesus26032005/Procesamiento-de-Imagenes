@@ -107,7 +107,23 @@ class Imagen:
         imagenUmbralizada = np.where(self.imagenGris >= umbral, 255, 0).astype(np.uint8)
         return self.convertirImagenTK(imagenUmbralizada)
     
-    def umbralizarAdaptativoImagenMedia(self, C):
+    def calcularVecindad(self, x, y):
+        listaVecindad = []
+        for i in range(x-2, x+3):
+            for j in range(y-2, y+3):
+                if (0 <= i) and (0 <= j) and (i < self.alto) and (j < self.ancho):
+                    if not (i == x and j == y):  # si NO quieres el centro
+                        listaVecindad.append(self.imagenGris[i, j])
+        return listaVecindad
+
+    def umbralizarAdaptativoImagen(self, C):
+        imagenUmbralizada = np.zeros((self.alto, self.ancho), dtype=np.uint8)
         for i in range(1, self.alto - 1):
             for j in range(1, self.ancho - 1):
-                pass
+                vecindad = self.calcularVecindad(i, j)
+                umbralLocal = np.mean(vecindad) - C
+                if self.imagenGris[i, j] >= umbralLocal:
+                    imagenUmbralizada[i, j] = 255
+                else:
+                    imagenUmbralizada[i, j] = 0
+        return self.convertirImagenTK(imagenUmbralizada)
