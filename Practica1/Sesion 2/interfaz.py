@@ -18,12 +18,13 @@ class Interfaz(ttk.Window):
         self.mainloop()  # Inicia el bucle principal de la aplicación
 
     def configuracionesIniciales(self):
-        super().__init__(themename="solar")  # Llama al constructor padre con tema "solar"
+        super().__init__(themename="superhero")  # Llama al constructor padre con tema "solar"
         self.title("Practica 1")  # Establece el título de la ventana
         self.geometry("1600x900")  # Define el tamaño de la ventana
-        self.resizable(False,False)  # Hace que la ventana no sea redimensionable
+        self.resizable(True,True)  # Hace que la ventana no sea redimensionable
 
         # Configura el comportamiento de las columnas para el layout
+        self.rowconfigure(0, weight=1)
         self.columnconfigure(0, weight=0)  # Columna 0 (panel de control) tamaño fijo
         self.columnconfigure(1, weight=1)  # Columna 1 (panel de visualización) se expande
 
