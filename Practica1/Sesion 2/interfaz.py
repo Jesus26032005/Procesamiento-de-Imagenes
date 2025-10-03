@@ -315,6 +315,7 @@ class Interfaz(ttk.Window):
             ax.set_title("Histograma del canal " + canales[i])
             # Configura la cuadrícula del eje Y
             ax.yaxis.set_major_locator(MultipleLocator(1000))
+            ax.xaxis.set_major_locator(MultipleLocator(25))
             ax.yaxis.grid(True, linestyle="--", alpha=0.7)
             # Integra el gráfico en la interfaz de tkinter
             canvas = FigureCanvasTkAgg(fig, master=self.marcoHistograma)
@@ -356,6 +357,7 @@ class Interfaz(ttk.Window):
         ax.set_title("Histograma de escala de grises");
         # Configura la cuadrícula del eje Y
         ax.yaxis.set_major_locator(MultipleLocator(1000))
+        ax.xaxis.set_major_locator(MultipleLocator(25))
         ax.yaxis.grid(True, linestyle="--", alpha=0.7)
         # Integra el gráfico en la interfaz de tkinter
         canvas = FigureCanvasTkAgg(fig, master=self.marcoHistogramaGrises)
