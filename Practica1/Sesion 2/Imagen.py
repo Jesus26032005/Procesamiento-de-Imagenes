@@ -22,6 +22,7 @@ class Imagen:
         try:
             imagenPil = ImagenPillow.open(self.ruta).convert("RGB")
             self.imagenCv = np.array(imagenPil)
+            self.alto, self.ancho = self.imagenCv.shape[0], self.imagenCv.shape[1]
             max_dimension = (1400, 600)
             imagenAuxiliada = imagenPil.copy()
             imagenAuxiliada.thumbnail(max_dimension, ImagenPillow.LANCZOS)
@@ -47,7 +48,6 @@ class Imagen:
     
     def obtenerImagenGris(self):
         if self.imagenCv is not None:
-            self.alto, self.ancho = self.imagenCv.shape[0], self.imagenCv.shape[1]
             self.imagenGris = np.zeros((self.alto, self.ancho), dtype=np.uint8)
             for i in range(self.alto):
                 for j in range(self.ancho):
@@ -67,13 +67,6 @@ class Imagen:
                 valor, frecuencia = np.unique(canal, return_counts=True)
                 listaValores.append((valor, frecuencia))
             return listaValores
-
-    def calcularHistograma(self, matriz):
-        histograma = []
-        for canal in matriz:
-            valor, frecuencia = np.unique(canal, return_counts=True)
-            histograma.append((valor, frecuencia))
-        return histograma
 
     def calcularPropiedadesImagenRGB(self):
         resultadosPorCanal = []
