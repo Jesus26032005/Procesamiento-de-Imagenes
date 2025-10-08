@@ -18,7 +18,7 @@ class Interfaz(ttk.Window):
         self.mainloop()  # Inicia el bucle principal de la aplicación
 
     def configuracionesIniciales(self):
-        super().__init__(themename="superhero")  # Llama al constructor padre con tema "solar"
+        super().__init__(themename="vapor")  # Llama al constructor padre con tema "solar"
         self.title("Practica 1")  # Establece el título de la ventana
         self.geometry("1600x900")  # Define el tamaño de la ventana
         self.resizable(True,True)  # Hace que la ventana no sea redimensionable
@@ -111,9 +111,12 @@ class Interfaz(ttk.Window):
         self.indicacionesConversiones = ttk.Label(self.marcoConversiones, text="Seleccione un modelo de color para visualizarlo", font=("Arial", 10))
         
         # Crea los botones para las diferentes conversiones
-        self.botonModeloGris = ttk.Button(self.marcoConversiones, text="Convertir a escala de gris", bootstyle=estiloConversiones, command=self.convertirEscalaGris)
-        self.botonUmbralFijo = ttk.Button(self.marcoConversiones, text="Binarizar imagen por fijo", bootstyle=estiloConversiones, command=self.binarizarImagenFijo)
-        self.botonUmbralAdaptativo = ttk.Button(self.marcoConversiones, text="Binarizar imagen por adaptativo", bootstyle=estiloConversiones, command=self.binarizarImagenAdaptativo)
+        self.botonModeloGris = ttk.Button(self.marcoConversiones, text="Convertir a escala de gris", bootstyle=estiloConversiones,
+        command=self.convertirEscalaGris)
+        self.botonUmbralFijo = ttk.Button(self.marcoConversiones, text="Binarizar imagen por fijo", bootstyle=estiloConversiones,
+        command=self.binarizarImagenFijo)
+        self.botonUmbralAdaptativo = ttk.Button(self.marcoConversiones, text="Binarizar imagen por adaptativo", bootstyle=estiloConversiones, 
+        command=self.binarizarImagenAdaptativo)
 
         # Coloca las etiquetas ocupando ambas columnas
         self.subTituloConversiones.grid(row=0, column=0, columnspan=3, sticky="nsew", padx=5, pady=5)
@@ -267,7 +270,8 @@ class Interfaz(ttk.Window):
             messagebox.showwarning("Atención", "Requieres tener el histograma de grises para usar un umbral fijo.")
             return
         # Pide al usuario el valor de la constante para el umbral adaptativo
-        valorConstante = simpledialog.askinteger("Constante", "Introduce el valor de la constante (recomendado 2-10, minimo: -15 y maximo 20), si hay mucho ruido pruebe con valores altos:", minvalue=-20, maxvalue=20)
+        valorConstante = simpledialog.askinteger("Constante", "Introduce el valor de la constante (recomendado 2-10, minimo: -15 y maximo 20)," \
+        "si hay mucho ruido pruebe con valores altos:", minvalue=-20, maxvalue=20)
         if valorConstante is not None:  # Si el usuario ingresó un valor
             # Llama al método de binarización con umbral adaptativo
             imagenBinarizada= self.imagen.umbralizarAdaptativoImagen(valorConstante)
@@ -324,7 +328,8 @@ class Interfaz(ttk.Window):
             canvas.get_tk_widget().grid(row=i*2, column=0, sticky="nsew")  # Lo coloca en la interfaz
 
             # Crea un texto con las propiedades estadísticas del canal
-            texto = f"Canal {canales[i]}: Media={listaValoresRGB[i][0]:.2f}, entropia={listaValoresRGB[i][1]:.2f}, Varianza={listaValoresRGB[i][2]:.2f}, asimetria={listaValoresRGB[i][3]:.2f}, energia={listaValoresRGB[i][4]:.2f}"
+            texto = f"Canal {canales[i]}: Media={listaValoresRGB[i][0]:.2f}, entropia={listaValoresRGB[i][1]:.2f}, \
+            Varianza={listaValoresRGB[i][2]:.2f}, asimetria={listaValoresRGB[i][3]:.2f}, energia={listaValoresRGB[i][4]:.2f}"
             # Muestra el texto debajo de cada histograma
             ttk.Label(self.marcoHistograma, text=texto, font=("Arial", 10)).grid(row=i*2+1, column=0, sticky="w", padx=5, pady=2)
 
@@ -367,7 +372,8 @@ class Interfaz(ttk.Window):
         # Obtiene las propiedades estadísticas de la imagen en gris
         listaValoresGris = self.imagen.calcularPropiedadesImagenGris()
         # Crea un texto con las propiedades estadísticas
-        texto = f"Canal Gris: Media={listaValoresGris[0]:.2f}, entropia={listaValoresGris[1]:.2f}, Varianza={listaValoresGris[2]}, asimetria={listaValoresGris[3]:.2f}, energia={listaValoresGris[4]:.2f}"
+        texto = f"Canal Gris: Media={listaValoresGris[0]:.2f}, entropia={listaValoresGris[1]:.2f}, \n"
+        texto += f"Varianza={listaValoresGris[2]}, asimetria={listaValoresGris[3]:.2f}, energia={listaValoresGris[4]:.2f}"
         # Muestra el texto debajo del histograma
         ttk.Label(self.marcoHistogramaGrises, text= texto, font=("Arial", 10)).grid(row=2, column=0, sticky="w", padx=5, pady=2)
 

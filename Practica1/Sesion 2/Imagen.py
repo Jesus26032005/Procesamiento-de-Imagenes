@@ -5,10 +5,6 @@ import cv2  # OpenCV para operaciones avanzadas de procesamiento de imágenes
 import numpy as np  # NumPy para operaciones matemáticas con arrays
 
 class Imagen:
-    """
-    Clase para el manejo y procesamiento de imágenes digitales.
-    Incluye métodos para conversión de formatos, análisis estadístico y umbralización.
-    """
     def __init__(self, ruta=None):
         """
         Constructor de la clase Imagen.
@@ -65,14 +61,14 @@ class Imagen:
     
     def obtenerImagenGris(self):
         """
-        Convierte la imagen a color a escala de grises usando la fórmula estándar de luminancia.
+        Convierte la imagen a color a escala de grises usando la fórmula siguiente
         Formula: Gris = 0.299*R + 0.587*G + 0.114*B
         """
         if self.imagenCv is not None:  # Verifica que la imagen esté cargada
             self.imagenGris = np.zeros((self.alto, self.ancho), dtype=np.uint8)  # Crea matriz vacía para imagen en grises
             for i in range(self.alto):  # Recorre todas las filas de la imagen
                 for j in range(self.ancho):  # Recorre todas las columnas de la imagen
-                    # Aplica la fórmula de conversión a escala de grises (ponderación por luminancia)
+                    # Aplica la fórmula de conversión a escala de grises 
                     valorGris = int(0.299 * self.imagenCv[i, j, 0] + 0.587 * self.imagenCv[i, j, 1] + 0.114 * self.imagenCv[i, j, 2])
                     self.imagenGris[i, j] = valorGris  # Asigna el valor calculado al píxel correspondiente
             return self.convertirImagenTK(self.imagenGris)  # Convierte y retorna la imagen para mostrar en Tkinter
