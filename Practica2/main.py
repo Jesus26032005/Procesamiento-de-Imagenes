@@ -20,7 +20,7 @@ from matplotlib.colors import LinearSegmentedColormap
 # Carga de la imagen (gris)
 # ---------------------------
 # Se carga la imagen en escala de grises. Ajusta la ruta si es necesario.
-imagen_gris = cv2.imread('Practica2/imagenCabezaZadd.jpg', cv2.IMREAD_GRAYSCALE)
+imagen_gris = cv2.imread('Practica2/boll.jpg', cv2.IMREAD_GRAYSCALE)
 if imagen_gris is None:
     # Mensaje claro para el usuario y salida segura
     print("Error al cargar la imagen: 'Practica2/imagenCabezaZadd.jpg' no encontrada.")
@@ -87,11 +87,20 @@ coloresArcoiris = [
 ]
 mapa_arcoiris = LinearSegmentedColormap.from_list("ArcoirisMap", coloresArcoiris, N=7)
 
+coloresBolilloMoho = [
+    (102/255, 51/255, 0/255),    # marrón oscuro
+    (153/255, 102/255, 51/255),  # marrón medio
+    (26/255, 128/255, 0/255), #verde moho
+    (204/255, 153/255, 102/255), # marrón claro
+    (255/255, 204/255, 153/255),  # beige
+]
+mapa_bolillo_moho = LinearSegmentedColormap.from_list("BolilloMohoMap", coloresBolilloMoho, N=5)
+
 # ---------------------------
 # Visualización con Matplotlib
 # ---------------------------
-# Creamos una figura con 4 filas x 2 columnas para comparar los resultados.
-fig, axs = plt.subplots(4, 2, figsize=(10, 8))
+# Creamos una figura con 5 filas x 2 columnas para comparar los resultados.
+fig, axs = plt.subplots(5, 2, figsize=(10, 10))
 
 # Escala de grises (imagen original)
 axs[0, 0].imshow(imagen_gris, cmap='gray')
@@ -120,6 +129,9 @@ axs[3, 0].set_title('Pseudocolor: Divisiones (Matplotlib)')
 
 axs[3, 1].imshow(imagen_gris, cmap=mapa_arcoiris)
 axs[3, 1].set_title('Pseudocolor: Arcoiris (Matplotlib)')
+
+axs[4, 0].imshow(imagen_gris, cmap=mapa_bolillo_moho)
+axs[4, 0].set_title('Pseudocolor: Bolillo Moho (Matplotlib)')
 
 # Quitar ejes para una visualización más limpia
 for ax in axs.flat:
