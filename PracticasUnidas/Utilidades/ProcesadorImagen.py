@@ -19,7 +19,7 @@ class ProcesadorImagen:
             imagen_cv = np.array(imagen_pillow)
             imagen_cv= cv2.resize(imagen_cv, (1400, 600))
             imagen_copia_modified = imagen_cv.copy()
-            return ImagenData(imagen_cv, imagen_copia_modified, imagen_cv.shape[0], imagen_cv.shape[1], 'color')
+            return ImagenData(imagen_cv, imagen_copia_modified, imagen_cv.shape[0], imagen_cv.shape[1], 'rgb')
         except tuple(MENSAJES_ERROR.keys()) as e:
             return MENSAJES_ERROR[type(e)]
         except Exception as e:
@@ -28,17 +28,13 @@ class ProcesadorImagen:
     @staticmethod
     def reiniciar_imagen(imagen: ImagenData):
         imagen.imagen_modified = imagen.imagen_cv.copy()
-        imagen.tipo = 'color'
+        imagen.tipo = 'rgb'
         return (ProcesadorImagen.convertir_imagen_tk(imagen.imagen_modified), 
         ProcesadorImagen.calcular_histograma_color(imagen.imagen_modified))
 
     @staticmethod
     def guardar_imagen(imagen: np.ndarray, ruta: str):
-        try:
-            cv2.imwrite(ruta, imagen)
-            return True
-        except Exception as e:
-            return "Error al guardar la imagen."
+        cv2.imwrite(ruta, imagen)
     
     def convertir_imagen_tk(imagen: np.ndarray):
         max_dimension = (1400, 600)
@@ -86,30 +82,39 @@ class ProcesadorImagen:
         return histogramaValores
 
     def determinarTipo(tipo_imagen_1: str, tipo_imagen_2: str):
-        if tipo_imagen_1 == 'color' or tipo_imagen_2 == 'color':
-            return 'color'
+        if tipo_imagen_1 == 'rgb' or tipo_imagen_2 == 'rgb':
+            return 'rgb'
         if tipo_imagen_1 == 'gris' and tipo_imagen_2 == 'gris':
             return 'gris'
         if tipo_imagen_1 == 'binario' and tipo_imagen_2 == 'binario':
             return 'binario'
         if (tipo_imagen_1 == 'gris' and tipo_imagen_2 == 'binario') or (tipo_imagen_1 == 'binario' and tipo_imagen_2 == 'gris'):
             return 'gris'
-        if (tipo_imagen_1 == 'color' and tipo_imagen_2 == 'binario') or (tipo_imagen_1 == 'binario' and tipo_imagen_2 == 'color') or (tipo_imagen_1 == 'color' and tipo_imagen_2 == 'gris') or (tipo_imagen_1 == 'gris' and tipo_imagen_2 == 'color'):
-            return 'color'
+        if (tipo_imagen_1 == 'rgb' and tipo_imagen_2 == 'binario') or (tipo_imagen_1 == 'binario' and tipo_imagen_2 == 'rgb') or (tipo_imagen_1 == 'rgb' and tipo_imagen_2 == 'gris') or (tipo_imagen_1 == 'gris' and tipo_imagen_2 == 'rgb'):
+            return 'rgb'
 
     @staticmethod
     def sumar_escalar(imagen: ImagenData, valor: int):
         cv2.add(imagen.imagen_modified, valor, imagen.imagen_modified)
+        if imagen.tipo == 'binaria':
+            imagen.tipo = 'gris'
+
         return ProcesadorImagen.convertir_imagen_tk(imagen.imagen_modified)
     
     @staticmethod
     def restar_escalar(imagen: ImagenData, valor: int):
         cv2.subtract(imagen.imagen_modified, valor, imagen.imagen_modified)
+        if imagen.tipo == 'binaria':
+            imagen.tipo = 'gris'
+
         return ProcesadorImagen.convertir_imagen_tk(imagen.imagen_modified)
     
     @staticmethod
     def multiplicar_escalar(imagen: ImagenData, valor: int):
         cv2.multiply(imagen.imagen_modified, valor, imagen.imagen_modified)
+        if imagen.tipo == 'binaria':
+            imagen.tipo = 'gris'
+            
         return ProcesadorImagen.convertir_imagen_tk(imagen.imagen_modified)
     
     @staticmethod
@@ -121,8 +126,8 @@ class ProcesadorImagen:
             ProcesadorImagen.restar_imagenes(imagen_1, imagen_2)
         if operacion == 'multiplicacion':
             ProcesadorImagen.multiplicar_imagenes(imagen_1, imagen_2)
-        return (ProcesadorImagen.convertir_imagen_tk(imagen_1.imagen_modified), 
-        ProcesadorImagen.calcular_histograma_color(imagen_1.imagen_modified))
+        
+        return ProcesadorImagen.convertir_imagen_tk(imagen_1.imagen_modified)
 
     def sumar_imagenes(imagen_1: ImagenData, imagen_2: ImagenData):
         cv2.add(imagen_1.imagen_modified, imagen_2.imagen_modified, imagen_1.imagen_modified)
@@ -142,8 +147,7 @@ class ProcesadorImagen:
             ProcesadorImagen.and_logico(imagen_1, imagen_2)
         if operacion == 'xor':
             ProcesadorImagen.xor_logico(imagen_1, imagen_2)
-        return (ProcesadorImagen.convertir_imagen_tk(imagen_1.imagen_modified), 
-        ProcesadorImagen.calcular_histograma_color(imagen_1.imagen_modified))
+        return ProcesadorImagen.convertir_imagen_tk(imagen_1.imagen_modified)
     
     def or_logico(imagen_1: ImagenData, imagen_2: ImagenData):
         cv2.bitwise_or(imagen_1.imagen_modified, imagen_2.imagen_modified, imagen_1.imagen_modified)

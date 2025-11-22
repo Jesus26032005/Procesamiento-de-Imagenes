@@ -8,4 +8,4 @@ class ImagenData:
     imagen_modified: np.ndarray
     alto: int
     ancho: int
-    tipo: str = 'color'
+    tipo: str = 'rgb'
