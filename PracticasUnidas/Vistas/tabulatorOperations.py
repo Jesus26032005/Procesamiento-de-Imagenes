@@ -1,6 +1,10 @@
 import ttkbootstrap as ttk
 
 class TabulatorOperations(ttk.Frame):
+    """
+    Clase que representa la pestaña de operaciones aritméticas y lógicas.
+    Permite realizar operaciones entre imágenes o con valores escalares.
+    """
     def __init__(self, parent):
         super().__init__(parent)
         
@@ -14,6 +18,11 @@ class TabulatorOperations(ttk.Frame):
         self._crear_componentes_operaciones_img2()
 
     def _crear_componentes_operaciones_img1(self):
+        """
+        Crea e inicializa los componentes de la interfaz para operaciones
+        relacionadas con la imagen principal (Imagen 1).
+        Incluye operaciones aritméticas (escalar y entre imágenes) y lógicas.
+        """
         estiloControlesImg = "warning"
         self.marcoControlesImagen1 =ttk.Labelframe(self, text="Controles de imagen principal", padding=5, bootstyle=estiloControlesImg)
         self.marcoControlesImagen1.grid(row=1, column=0, sticky="nsew", padx=5, pady=5)
@@ -60,6 +69,11 @@ class TabulatorOperations(ttk.Frame):
         self.boton_extra_img1.grid(row=9, column=0, columnspan=3, sticky="nsew", padx=5, pady=5)
 
     def _crear_componentes_operaciones_img2(self):
+        """
+        Crea e inicializa los componentes de la interfaz para operaciones
+        relacionadas con la imagen secundaria (Imagen 2).
+        Incluye operaciones aritméticas (escalar y entre imágenes) y lógicas.
+        """
         estiloControlesImg = "danger"
         self.marcoControlesImagen2 =ttk.Labelframe(self, text="Controles de imagen secundaria", padding=5, bootstyle=estiloControlesImg)
         self.marcoControlesImagen2.grid(row=2, column=0, sticky="nsew", padx=5, pady=5)
