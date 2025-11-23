@@ -7,6 +7,7 @@ class ImageController:
         self.view = view
         self.conectar_eventos_basicos()
         self.conectar_eventos_operaciones()
+        self.conectar_eventos_filtros()
 
     def conectar_eventos_basicos(self):
         self.tabulador_main = self.view.tabulator_main
@@ -50,6 +51,15 @@ class ImageController:
         self.tabulator_operations.boton_and_logico_img2.config(command= lambda: self.operacion_logica_entre_imagenes("and", 2, 1))
         self.tabulator_operations.boton_not_logico_img2.config(command= lambda: self.operacion_not(2))
         self.tabulator_operations.boton_xor_logico_img2.config(command= lambda: self.operacion_logica_entre_imagenes("xor", 2, 1))
+
+    def conectar_eventos_filtros(self):
+        self.tabulator_filters= self.view.tabulator_filters
+        self.tabulator_filters.boton_agregar_ruido_sal_y_pimienta_Img1.config(command= lambda: self.agregar_ruido("sal y pimienta",1))
+        self.tabulator_filters.boton_agregar_ruido_sal_y_pimienta_Img2.config(command= lambda: self.agregar_ruido("sal y pimienta",2))
+        self.tabulator_filters.boton_agregar_ruido_gaussiano_Img1.config(command= lambda: self.agregar_ruido("gaussiano",1))
+        self.tabulator_filters.boton_agregar_ruido_gaussiano_Img2.config(command= lambda: self.agregar_ruido("gaussiano",2))
+        self.tabulator_filters.boton_aplicar_filtro_Img1.config(command= lambda: self.aplicar_filtro(1))
+        self.tabulator_filters.boton_aplicar_filtro_Img2.config(command= lambda: self.aplicar_filtro(2))
 
     def cargar_imagen(self, numero_imagen):
         rutaArchivo = self.tabulador_main.pedir_ruta_archivo()
@@ -168,4 +178,46 @@ class ImageController:
             return
         
         imagen_operada = self.model.operacion_not(numero_imagen)
+        self.view.actualizar_imagen(imagen_operada[0], imagen_operada[1], numero_imagen, imagen_operada[2])
+
+    def agregar_ruido(self, tipo_ruido, numero_imagen):
+        if not self.model.checar_existencia_imagen(numero_imagen):
+            self.view.mostrar_mensaje("No se tiene cargada la imagen", "info")
+            return
+
+        imagen_operada = self.model.agregar_ruido(tipo_ruido, numero_imagen)
+        self.view.actualizar_imagen(imagen_operada[0], imagen_operada[1], numero_imagen, imagen_operada[2])
+
+    def aplicar_filtro(self, numero_imagen):
+        valor_umbral_minimo = None
+        valor_umbral_maximo = None
+        if not self.model.checar_existencia_imagen(numero_imagen):
+            self.view.mostrar_mensaje("No se tiene cargada la imagen", "info")
+            return
+
+        filtro = None
+        if numero_imagen == 1:
+            filtro = self.tabulator_filters.lista_opciones_filtros_Img1.get()
+        else:
+            filtro = self.tabulator_filters.lista_opciones_filtros_Img2.get()
+
+        if not filtro:
+            self.view.mostrar_mensaje("No se selecciono un filtro", "info")
+            return
+
+        if filtro in ["Filtro Bilateral", "Filtro de Mediana Adaptativa", "Filtro de Media Contraharmonica", "Filtro de Mediana Ponderada"]:
+            self.view.mostrar_mensaje("Aviso: El filtro seleccionado requiere de una mayor cantidad de tiempo de procesado, por tanto se recomienda que si el programa deje de responder, espere hasta que el filtro termine de procesar la imagen", "info")            
+        
+        if filtro in ["Filtro de Sobel", "Filtro de Prewitt", "Filtro de Roberts", "Filtro de Canny", "Filtro Kirsch", "Filtro Laplaciano"]:
+            if self.model.determinar_tipo_imagen(numero_imagen) != 'gris':
+                self.view.mostrar_mensaje("El filtro seleccionado requiere que la imagen sea en escala de grises", "info")
+                return
+        
+        if filtro == "Filtro de Canny":
+            valor_umbral_minimo, valor_umbral_maximo = self.view.tabulator_filters.pedir_valor_canny()
+            if not valor_umbral_minimo or not valor_umbral_maximo:
+                self.view.mostrar_mensaje("No se ingresaron valores validos", "info")
+                return
+
+        imagen_operada = self.model.aplicar_filtro(filtro, numero_imagen, valor_umbral_minimo, valor_umbral_maximo)
         self.view.actualizar_imagen(imagen_operada[0], imagen_operada[1], numero_imagen, imagen_operada[2])

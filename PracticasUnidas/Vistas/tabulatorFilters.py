@@ -1,4 +1,5 @@
 import ttkbootstrap as ttk
+from tkinter import simpledialog
 
 class TabulatorFilters(ttk.Frame):
     def __init__(self, parent):
@@ -26,7 +27,7 @@ class TabulatorFilters(ttk.Frame):
         self.boton_agregar_ruido_sal_y_pimienta_Img1 = ttk.Button(self.marco_controles_ruido_filtros_img1, text="Ruido Sal y Pimienta", bootstyle=estiloControlesRuidoFiltro)
         self.boton_agregar_ruido_gaussiano_Img1 = ttk.Button(self.marco_controles_ruido_filtros_img1, text="Ruido Gaussiano", bootstyle=estiloControlesRuidoFiltro)
         self.subtitulo_aplicar_filtros_Img1 = ttk.Label(self.marco_controles_ruido_filtros_img1, text="Aplicar filtros a la imagen principal", font=("Arial", 14, "bold"), wraplength=400)
-        self.lista_tipo_filtros_Img1 = ttk.Combobox(self.marco_controles_ruido_filtros_img1, values=["Lineales", "No lineales", "Avanzados"], state="readonly")
+        self.lista_tipo_filtros_Img1 = ttk.Combobox(self.marco_controles_ruido_filtros_img1, values=["Lineales", "No lineales", "Avanzados", "Pasa-altas"], state="readonly")
         self.lista_opciones_filtros_Img1 = ttk.Combobox(self.marco_controles_ruido_filtros_img1, values=[])
         self.lista_tipo_filtros_Img1.bind("<<ComboboxSelected>>", self._actualizar_opciones_filtro_img1)
 
@@ -52,6 +53,8 @@ class TabulatorFilters(ttk.Frame):
             opcionesFiltros = ["Filtro de Mediana", "Filtro de Moda", "Filtro de Máximo", "Filtro de Mínimo"]
         elif opcionSeleccionada == "Avanzados":
             opcionesFiltros = ["Filtro Bilateral", "Filtro de Mediana Adaptativa", "Filtro de Media Contraharmonica", "Filtro de Mediana Ponderada"]
+        elif opcionSeleccionada == "Pasa-altas":
+            opcionesFiltros = ["Filtro de Sobel", "Filtro de Prewitt", "Filtro de Roberts", "Filtro de Canny", "Filtro Kirsch", "Filtro Laplaciano"]
 
         self.lista_opciones_filtros_Img1.set("")
         self.lista_opciones_filtros_Img1['values'] = opcionesFiltros
@@ -69,7 +72,7 @@ class TabulatorFilters(ttk.Frame):
         self.boton_agregar_ruido_sal_y_pimienta_Img2 = ttk.Button(self.marco_controles_ruido_filtros_img2, text="Ruido Sal y Pimienta", bootstyle="primary")
         self.boton_agregar_ruido_gaussiano_Img2 = ttk.Button(self.marco_controles_ruido_filtros_img2, text="Ruido Gaussiano", bootstyle="primary")
         self.subtitulo_aplicar_filtros_Img2 = ttk.Label(self.marco_controles_ruido_filtros_img2, text="Aplicar filtros a la imagen secundaria", font=("Arial", 14, "bold"), wraplength=400)
-        self.lista_tipo_filtros_Img2 = ttk.Combobox(self.marco_controles_ruido_filtros_img2, values=["Lineales", "No lineales", "Avanzados"], state="readonly")
+        self.lista_tipo_filtros_Img2 = ttk.Combobox(self.marco_controles_ruido_filtros_img2, values=["Lineales", "No lineales", "Avanzados", "Pasa-altas"], state="readonly")
         self.lista_opciones_filtros_Img2 = ttk.Combobox(self.marco_controles_ruido_filtros_img2, values=[])
         self.lista_tipo_filtros_Img2.bind("<<ComboboxSelected>>", self._actualizar_opciones_filtros_Img2)
         self.boton_aplicar_filtro_Img2 = ttk.Button(self.marco_controles_ruido_filtros_img2, text="Aplicar Filtro", bootstyle=estiloControlesRuidoFiltro)
@@ -95,7 +98,14 @@ class TabulatorFilters(ttk.Frame):
             opcionesFiltros = ["Filtro de Mediana", "Filtro de Moda", "Filtro de Máximo", "Filtro de Mínimo"]
         elif opcionSeleccionada == "Avanzados":
             opcionesFiltros = ["Filtro Bilateral", "Filtro de Mediana Adaptativa", "Filtro de Media Contraharmonica"]
+        elif opcionSeleccionada == "Pasa-altas":
+            opcionesFiltros = ["Filtro de Sobel", "Filtro de Prewitt", "Filtro de Roberts", "Filtro de Canny", "Filtro Kirsch", "Filtro Laplaciano"]
 
         self.lista_opciones_filtros_Img2.set("")
         self.lista_opciones_filtros_Img2['values'] = opcionesFiltros
         self.lista_opciones_filtros_Img2['state'] = "readonly"
+
+    def pedir_valor_canny(self):
+        valor_umbral_minimo = simpledialog.askinteger("Canny", "Ingrese el valor minimo del umbral (0-255):", minvalue=0, maxvalue=255)
+        valor_umbral_maximo = simpledialog.askinteger("Canny", "Ingrese el valor maximo del umbral (0-255):", minvalue=0, maxvalue=255)
+        return valor_umbral_minimo, valor_umbral_maximo

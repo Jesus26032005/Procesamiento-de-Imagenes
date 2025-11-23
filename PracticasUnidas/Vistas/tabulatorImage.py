@@ -97,4 +97,3 @@ class TabulatorImage(ttk.Frame):
     def aviso_binarizar_fijo(self):
         valorUmbral = simpledialog.askinteger("Binarización", "Ingrese el valor de umbral (0-255):", minvalue=0, maxvalue=255)
         return valorUmbral
-    

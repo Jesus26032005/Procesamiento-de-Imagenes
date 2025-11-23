@@ -42,10 +42,15 @@ class ImageModel:
         ProcesadorImagen.guardar_imagen(imagen)
 
     def convertir_escala_grises(self, numero_imagen):
+        histograma = None
         imagen = self._determinarImagen(numero_imagen)
-        return ProcesadorImagen.convertir_escala_grises(imagen)
+
+        histograma = ProcesadorImagen.calcular_histograma_gris(imagen.imagen_modified)
+
+        return (ProcesadorImagen.convertir_escala_grises(imagen), histograma)
 
     def binarizar_imagen(self, numero_imagen, metodo: str, umbral: int = None):
+        histograma = None
         imagen = self._determinarImagen(numero_imagen)
         if metodo == 'fijo':
             return [ProcesadorImagen.binarizar_metodo_fijo(imagen, umbral), None]
@@ -95,6 +100,7 @@ class ImageModel:
         return (resultado_operacion, histograma, imagen_1.tipo)
     
     def operacion_not(self, numero_imagen):
+        histograma = None
         imagen = self._determinarImagen(numero_imagen)
         resultado_operacion =  ProcesadorImagen.not_logico(imagen)
 
@@ -103,3 +109,33 @@ class ImageModel:
         elif imagen.tipo == 'gris':
             histograma = ProcesadorImagen.calcular_histograma_gris(imagen.imagen_modified)
         return (resultado_operacion, histograma, imagen.tipo)
+
+    def agregar_ruido(self, tipo_ruido, numero_imagen):
+        histograma = None
+        imagen = self._determinarImagen(numero_imagen)
+
+        if tipo_ruido == "sal y pimienta":
+            resultado_operacion = ProcesadorImagen.agregar_ruido_sal_pimienta(imagen)
+        elif tipo_ruido == "gaussiano":
+            resultado_operacion = ProcesadorImagen.agregar_ruido_gaussiano(imagen)
+
+        if imagen.tipo == 'rgb':
+            histograma = ProcesadorImagen.calcular_histograma_color(imagen.imagen_modified)
+        elif imagen.tipo == 'gris':
+            histograma = ProcesadorImagen.calcular_histograma_gris(imagen.imagen_modified)
+        return (resultado_operacion, histograma, imagen.tipo)
+
+    def aplicar_filtro(self, filtro, numero_imagen, valor_umbral_minimo = None, valor_umbral_maximo = None):
+        histograma = None
+        imagen = self._determinarImagen(numero_imagen)
+        resultado_operacion = ProcesadorImagen.aplicar_filtro(filtro, imagen, valor_umbral_minimo, valor_umbral_maximo)
+
+        if imagen.tipo == 'rgb':
+            histograma = ProcesadorImagen.calcular_histograma_color(imagen.imagen_modified)
+        elif imagen.tipo == 'gris':
+            histograma = ProcesadorImagen.calcular_histograma_gris(imagen.imagen_modified)
+        return (resultado_operacion, histograma, imagen.tipo)
+
+    def determinar_tipo_imagen(self, numero_imagen):
+        imagen = self._determinarImagen(numero_imagen)
+        return imagen.tipo
