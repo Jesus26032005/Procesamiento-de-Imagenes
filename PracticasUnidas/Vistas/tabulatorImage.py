@@ -8,6 +8,11 @@ paddingTitulos = {"padx": 5, "pady": 1}
 paddingFrames = {"padx": 10, "pady": 10, "ipady": 5}
 
 class TabulatorImage(ttk.Frame):
+    """
+    Clase que representa la pestaña de operaciones básicas de imagen.
+    Permite cargar, reiniciar, guardar y realizar operaciones básicas (grises, binarización)
+    sobre las imágenes.
+    """
     def __init__(self, parent):
         super().__init__(parent)
 
@@ -15,9 +20,13 @@ class TabulatorImage(ttk.Frame):
         for i in range(1,9): self.rowconfigure(i, weight=1)
         self.columnconfigure(0, weight=1)
 
-        self._configurarPanelControl()
+        self._configura_panel_control()
 
-    def _configurarPanelControl(self):
+    def _configura_panel_control(self):
+        """
+        Configura y organiza los paneles de control para la carga y operaciones básicas.
+        Crea dos secciones: una para carga/reinicio/guardado y otra para operaciones básicas.
+        """
         # Configuracion de estilos
         estilosCargaReinicio = "primary"
         estilosControlesBasicos = "success"
@@ -81,6 +90,12 @@ class TabulatorImage(ttk.Frame):
         self.button_binarizar_otsu_img2.grid(row=8, column=0, sticky="ew", **paddingBotones)
     
     def pedir_ruta_archivo(self):
+        """
+        Abre un cuadro de diálogo para seleccionar un archivo de imagen.
+        
+        Returns:
+            str or None: Ruta del archivo seleccionado o None si se cancela.
+        """
         ruta_archivo = filedialog.askopenfilename(title="Seleccionar imagen", filetypes=[("Image files", "*.jpg *.jpeg *.png"), ("All files")])
         if ruta_archivo:
             return ruta_archivo
@@ -88,6 +103,12 @@ class TabulatorImage(ttk.Frame):
             return None
 
     def pedir_ruta_archivo_guardar(self):
+        """
+        Abre un cuadro de diálogo para guardar una imagen.
+        
+        Returns:
+            str or None: Ruta de destino seleccionada o None si se cancela.
+        """
         ruta_archivo = filedialog.asksaveasfilename(title="Guardar imagen", filetypes=[("Image files", "*.jpg *.jpeg *.png"), ("All files")])
         if ruta_archivo:
             return ruta_archivo
@@ -95,5 +116,11 @@ class TabulatorImage(ttk.Frame):
             return None
     
     def aviso_binarizar_fijo(self):
+        """
+        Solicita al usuario un valor de umbral para la binarización fija.
+        
+        Returns:
+            int or None: Valor del umbral (0-255) o None si se cancela.
+        """
         valorUmbral = simpledialog.askinteger("Binarización", "Ingrese el valor de umbral (0-255):", minvalue=0, maxvalue=255)
         return valorUmbral
