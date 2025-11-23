@@ -3,7 +3,7 @@ from ttkbootstrap.constants import *
 from Vistas.tabulatorOperations import TabulatorOperations
 from Vistas.tabulatorImage import TabulatorImage
 from Vistas.tabulatorFilters import TabulatorFilters
-from tkinter import simpledialog
+from tkinter import filedialog, messagebox, simpledialog, DISABLED
 from ttkbootstrap.scrolled import ScrolledFrame
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
@@ -14,11 +14,6 @@ paddingTitulos = {"padx": 5, "pady": 1}
 paddingFrames = {"padx": 10, "pady": 10, "ipady": 5}
 
 class MainWindow(ttk.Window):
-    """
-    Ventana principal de la aplicación.
-    Hereda de ttk.Window y gestiona la interfaz gráfica principal, incluyendo
-    la visualización de imágenes y los paneles de control (tabuladores).
-    """
     def __init__(self):
         super().__init__(themename="cyborg")
         self.title("Procesamiento de Imagenes - Practicas minireto")
@@ -30,10 +25,6 @@ class MainWindow(ttk.Window):
         self.configurar_frames()
 
     def configurar_frames(self):
-        """
-        Configura y posiciona los frames principales de la interfaz.
-        Divide la ventana en un panel para imágenes y un panel para tabuladores.
-        """
         self.panel_imagen_global = ScrolledFrame(self, padding=10)
         self.panel_imagen_global.grid(row=0, column=0, sticky="nsew", columnspan=8)
         self.panel_imagen_global.columnconfigure(0, weight=1)
@@ -44,14 +35,10 @@ class MainWindow(ttk.Window):
         self.panelTabulator.columnconfigure(0, weight=1)
         self.panelTabulator.rowconfigure(0, weight=1)
         
-        self._configura_panel_imagen()
-        self._configura_panel_tabulator()
+        self._configurarPanelImagen()
+        self._configurarPanelTabulator()
 
-    def _configura_panel_tabulator(self):
-        """
-        Inicializa y agrega las pestañas (tabs) al panel de tabuladores.
-        Incluye pestañas para la práctica principal, operaciones y filtros.
-        """
+    def _configurarPanelTabulator(self):
         self.tabulator_main = TabulatorImage(self.panelTabulator)
         self.tabulator_operations = TabulatorOperations(self.panelTabulator)
         self.tabulator_filters = TabulatorFilters(self.panelTabulator)
@@ -59,12 +46,7 @@ class MainWindow(ttk.Window):
         self.panelTabulator.add(self.tabulator_operations, text="Operaciones")
         self.panelTabulator.add(self.tabulator_filters, text="Filtros")
 
-    def _configura_panel_imagen(self):
-        """
-        Configura los frames para la visualización de imágenes.
-        Crea dos áreas: una para la imagen principal y otra para la imagen adicional,
-        mostrando tanto la versión original como la modificada.
-        """
+    def _configurarPanelImagen(self):
         estiloImagen1 = "info"
         estiloImagen2 = "warning"
 
@@ -102,15 +84,6 @@ class MainWindow(ttk.Window):
         self.label_visualizacion_lab_img2Modified.grid(row=7, column=0, sticky="nsew", **paddingTitulos)
 
     def mostrar_imagen_cargada(self, imagen_tkinter,  histograma ,no_imagen, tipo_imagen="original"):
-        """
-        Muestra una imagen cargada en la interfaz y genera sus histogramas.
-        
-        Args:
-            imagen_tkinter (tuple): Tupla con imagen original y modificada en formato Tkinter.
-            histograma (list): Datos del histograma de la imagen.
-            no_imagen (int): Identificador de la imagen (1 o 2).
-            tipo_imagen (str, optional): Tipo de imagen. Defaults to "original".
-        """
         imagenOriginal = imagen_tkinter[0]
         imagenModificada = imagen_tkinter[1]
         histograma_imagen = histograma
@@ -130,14 +103,6 @@ class MainWindow(ttk.Window):
                 self.crear_histograma_rgb(no_imagen, histograma_imagen, modalidad="modificada")
 
     def crear_histograma_rgb(self, imagen_no, histograma,modalidad= 'principal'):
-        """
-        Crea y muestra histogramas RGB para una imagen.
-        
-        Args:
-            imagen_no (int): Identificador de la imagen.
-            histograma (list): Datos del histograma.
-            modalidad (str, optional): 'principal' (original) o 'modificada'. Defaults to 'principal'.
-        """
         datos = self.determinar_ubicacion_grid_img(imagen_no, modalidad)
         ubicacion, no_grid = datos[0], datos[1]
         for i in range(3):
@@ -167,13 +132,6 @@ class MainWindow(ttk.Window):
             canvas.get_tk_widget().grid(row=no_grid+i, column=0, sticky="nsew")
     
     def crear_histograma_gris(self, imagen_no, histograma):
-        """
-        Crea y muestra un histograma en escala de grises.
-        
-        Args:
-            imagen_no (int): Identificador de la imagen.
-            histograma (tuple): Datos del histograma (valores, frecuencias).
-        """
         datos = self.determinar_ubicacion_grid_img(imagen_no, 'adicional')
         ubicacion, no_grid = datos[0], datos[1]
 
@@ -202,15 +160,6 @@ class MainWindow(ttk.Window):
         canvas.get_tk_widget().grid(row=no_grid, column=0, sticky="nsew")
 
     def actualizar_imagen(self, imagen_tkinter, histograma, no_imagen, tipo_imagen):
-        """
-        Actualiza la visualización de una imagen modificada y sus histogramas.
-        
-        Args:
-            imagen_tkinter (ImageTk.PhotoImage): Imagen modificada para mostrar.
-            histograma (list/tuple): Datos del histograma actualizado.
-            no_imagen (int): Identificador de la imagen.
-            tipo_imagen (str): Tipo de imagen ('rgb', 'gris', 'binaria').
-        """
         if no_imagen == 1:
             self.label_visualizacion_lab_img1Modified.config(image=imagen_tkinter)
             self.label_visualizacion_lab_img1Modified.image = imagen_tkinter
@@ -238,16 +187,6 @@ class MainWindow(ttk.Window):
                     for widget in widgets: widget.destroy()
 
     def determinar_ubicacion_grid_img(self, noImagen, modalidad= 'principal'):
-        """
-        Determina el widget contenedor y la fila inicial para los gráficos.
-        
-        Args:
-            noImagen (int): Identificador de la imagen.
-            modalidad (str, optional): 'principal' o 'modificada'. Defaults to 'principal'.
-            
-        Returns:
-            tuple: (widget_contenedor, fila_inicial)
-        """
         ubicacion = None
         no_grid = 0
 
@@ -258,13 +197,6 @@ class MainWindow(ttk.Window):
         return ubicacion, no_grid
 
     def mostrar_mensaje(self, mensaje, tipo_mensaje="info"):
-        """
-        Muestra un cuadro de diálogo con un mensaje.
-        
-        Args:
-            mensaje (str): Texto del mensaje.
-            tipo_mensaje (str, optional): Tipo de mensaje ('info', 'error', 'warning'). Defaults to "info".
-        """
         if tipo_mensaje == "info":
             messagebox.showinfo("Información", mensaje)
         elif tipo_mensaje == "error":
