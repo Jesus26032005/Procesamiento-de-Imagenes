@@ -1,11 +1,31 @@
 from Utilidades.ProcesadorImagen import ProcesadorImagen
 
+"""
+Modelo de la aplicación.
+Gestiona el estado de las imágenes y delega el procesamiento a la clase ProcesadorImagen.
+"""
+
 class ImageModel:
+    """
+    Clase Modelo que almacena las imágenes cargadas y gestiona las operaciones sobre ellas.
+    """
     def __init__(self):
+        """
+        Inicializa el modelo con dos espacios para imágenes (imagen1 e imagen2).
+        """
         self.imagen1 = None
         self.imagen2 = None
 
     def checar_existencia_imagen(self, numero_imagen):
+        """
+        Verifica si una imagen específica está cargada en el modelo.
+        
+        Args:
+            numero_imagen (int): Identificador de la imagen (1 o 2).
+            
+        Returns:
+            bool: True si la imagen existe, False en caso contrario.
+        """
         if numero_imagen == 1:
             if self.imagen1 is None:
                 return False 
@@ -16,6 +36,16 @@ class ImageModel:
             return True
     
     def crear_imagen(self, ruta, numero_imagen):
+        """
+        Carga una imagen desde una ruta y la almacena en el modelo.
+        
+        Args:
+            ruta (str): Ruta del archivo de imagen.
+            numero_imagen (int): Identificador de la imagen (1 o 2).
+            
+        Returns:
+            tuple or str: Tupla con la imagen TK y su histograma si es exitoso, o mensaje de error.
+        """
         if numero_imagen == 2 and self.imagen1 is None:
             return "La imagen 1 no está cargada."
         resultadoCreacion = ProcesadorImagen.cargar_imagen(ruta)
@@ -29,19 +59,52 @@ class ImageModel:
         ProcesadorImagen.calcular_histograma_color(resultadoCreacion.imagen_modified))
 
     def _determinarImagen(self, numero_imagen):
+        """
+        Método auxiliar para obtener la instancia de imagen correspondiente al número.
+        
+        Args:
+            numero_imagen (int): Identificador de la imagen (1 o 2).
+            
+        Returns:
+            ImagenData: Objeto con los datos de la imagen.
+        """
         if numero_imagen == 1:
             return self.imagen1
         elif numero_imagen == 2:
             return self.imagen2
 
     def reiniciar_imagen(self, numero_imagen):
+        """
+        Reinicia la imagen a su estado original.
+        
+        Args:
+            numero_imagen (int): Identificador de la imagen (1 o 2).
+            
+        Returns:
+            tuple: Imagen TK reiniciada y su histograma.
+        """
         return ProcesadorImagen.reiniciar_imagen(self._determinarImagen(numero_imagen))
 
     def guardar_imagen(self, numero_imagen):
+        """
+        Guarda la imagen actual en disco.
+        
+        Args:
+            numero_imagen (int): Identificador de la imagen (1 o 2).
+        """
         imagen = self._determinarImagen(numero_imagen)
         ProcesadorImagen.guardar_imagen(imagen)
 
     def convertir_escala_grises(self, numero_imagen):
+        """
+        Convierte la imagen a escala de grises.
+        
+        Args:
+            numero_imagen (int): Identificador de la imagen (1 o 2).
+            
+        Returns:
+            tuple: Imagen TK en grises y su histograma.
+        """
         histograma = None
         imagen = self._determinarImagen(numero_imagen)
 
@@ -50,6 +113,17 @@ class ImageModel:
         return (ProcesadorImagen.convertir_escala_grises(imagen), histograma)
 
     def binarizar_imagen(self, numero_imagen, metodo: str, umbral: int = None):
+        """
+        Binariza la imagen usando un método específico (fijo u Otsu).
+        
+        Args:
+            numero_imagen (int): Identificador de la imagen (1 o 2).
+            metodo (str): Método de binarización ('fijo' u 'otsu').
+            umbral (int, optional): Valor umbral para el método fijo.
+            
+        Returns:
+            list: Lista con la imagen TK binarizada y None (histograma no aplica igual).
+        """
         histograma = None
         imagen = self._determinarImagen(numero_imagen)
         if metodo == 'fijo':
@@ -58,6 +132,17 @@ class ImageModel:
             return [ProcesadorImagen.binarizar_metodo_otsu(imagen), None]
         
     def realizar_operacion_aritmetica_escalar(self, numero_imagen, operacion: str, valor: int):
+        """
+        Realiza una operación aritmética escalar sobre la imagen.
+        
+        Args:
+            numero_imagen (int): Identificador de la imagen.
+            operacion (str): Tipo de operación.
+            valor (int): Valor escalar.
+            
+        Returns:
+            tuple: Imagen resultante, histograma y tipo de imagen.
+        """
         imagen = self._determinarImagen(numero_imagen)
         histograma = None
 
@@ -75,6 +160,17 @@ class ImageModel:
         return (resultado_operacion, histograma, imagen.tipo)
     
     def realizar_operacion_aritmetica_entre_imagenes(self, numero_imagen_1, numero_imagen_2, operacion: str):
+        """
+        Realiza una operación aritmética entre dos imágenes.
+        
+        Args:
+            numero_imagen_1 (int): Identificador de la primera imagen.
+            numero_imagen_2 (int): Identificador de la segunda imagen.
+            operacion (str): Tipo de operación.
+            
+        Returns:
+            tuple: Imagen resultante, histograma y tipo de imagen.
+        """
         histograma = None
         imagen_1 = self._determinarImagen(numero_imagen_1)
         imagen_2 = self._determinarImagen(numero_imagen_2)
@@ -88,6 +184,17 @@ class ImageModel:
         return (resultado_operacion, histograma, imagen_1.tipo)
     
     def realizar_operacion_logica_entre_imagenes(self, numero_imagen_1, numero_imagen_2, operacion: str):
+        """
+        Realiza una operación lógica entre dos imágenes.
+        
+        Args:
+            numero_imagen_1 (int): Identificador de la primera imagen.
+            numero_imagen_2 (int): Identificador de la segunda imagen.
+            operacion (str): Tipo de operación.
+            
+        Returns:
+            tuple: Imagen resultante, histograma y tipo de imagen.
+        """
         histograma = None
         imagen_1 = self._determinarImagen(numero_imagen_1)
         imagen_2 = self._determinarImagen(numero_imagen_2)
@@ -100,6 +207,15 @@ class ImageModel:
         return (resultado_operacion, histograma, imagen_1.tipo)
     
     def operacion_not(self, numero_imagen):
+        """
+        Aplica la operación NOT a la imagen.
+        
+        Args:
+            numero_imagen (int): Identificador de la imagen.
+            
+        Returns:
+            tuple: Imagen resultante, histograma y tipo de imagen.
+        """
         histograma = None
         imagen = self._determinarImagen(numero_imagen)
         resultado_operacion =  ProcesadorImagen.not_logico(imagen)
@@ -111,6 +227,16 @@ class ImageModel:
         return (resultado_operacion, histograma, imagen.tipo)
 
     def agregar_ruido(self, tipo_ruido, numero_imagen):
+        """
+        Agrega ruido a la imagen.
+        
+        Args:
+            tipo_ruido (str): Tipo de ruido.
+            numero_imagen (int): Identificador de la imagen.
+            
+        Returns:
+            tuple: Imagen resultante, histograma y tipo de imagen.
+        """
         histograma = None
         imagen = self._determinarImagen(numero_imagen)
 
@@ -126,16 +252,39 @@ class ImageModel:
         return (resultado_operacion, histograma, imagen.tipo)
 
     def aplicar_filtro(self, filtro, numero_imagen, valor_umbral_minimo = None, valor_umbral_maximo = None):
+        """
+        Aplica un filtro a la imagen.
+        
+        Args:
+            filtro (str): Nombre del filtro.
+            numero_imagen (int): Identificador de la imagen.
+            valor_umbral_minimo (int, optional): Umbral mínimo (para Canny) o Radio (D0) para filtros de frecuencia.
+            valor_umbral_maximo (int, optional): Umbral máximo (para Canny).
+            
+        Returns:
+            tuple: Imagen resultante, histograma y tipo de imagen.
+        """
         histograma = None
         imagen = self._determinarImagen(numero_imagen)
+    
         resultado_operacion = ProcesadorImagen.aplicar_filtro(filtro, imagen, valor_umbral_minimo, valor_umbral_maximo)
 
         if imagen.tipo == 'rgb':
             histograma = ProcesadorImagen.calcular_histograma_color(imagen.imagen_modified)
         elif imagen.tipo == 'gris':
             histograma = ProcesadorImagen.calcular_histograma_gris(imagen.imagen_modified)
+            
         return (resultado_operacion, histograma, imagen.tipo)
 
     def determinar_tipo_imagen(self, numero_imagen):
+        """
+        Devuelve el tipo de la imagen (e.g., 'rgb', 'gris').
+        
+        Args:
+            numero_imagen (int): Identificador de la imagen.
+            
+        Returns:
+            str: Tipo de imagen.
+        """
         imagen = self._determinarImagen(numero_imagen)
         return imagen.tipo

@@ -239,7 +239,11 @@ class ProcesadorImagen:
             ProcesadorImagen.aplicar_filtro_roberts(imagen)
         elif filtro == 'Filtro de Canny':
             ProcesadorImagen.aplicar_filtro_canny(imagen, valor_umbral_minimo, valor_umbral_maximo)
-        
+        elif filtro == 'Filtro Laplaciano':
+            ProcesadorImagen.aplicar_filtro_laplaciano(imagen)
+        elif filtro == 'Filtro Laplaciano 8':
+            ProcesadorImagen.aplicar_filtro_laplaciano_8(imagen)
+            
         return ProcesadorImagen.convertir_imagen_tk(imagen.imagen_modified)
 
     def aplicar_filtro_promediador(imagen: ImagenData, kernel_size=3):
@@ -466,5 +470,64 @@ class ProcesadorImagen:
         imagen_gris = imagen.imagen_modified[:, :, 0]
         bordes_canny = cv2.Canny(imagen_gris, valor_umbral_minimo, valor_umbral_maximo)
         imagen.imagen_modified = cv2.merge((bordes_canny, bordes_canny, bordes_canny))
+        
+        return ProcesadorImagen.convertir_imagen_tk(imagen.imagen_modified)
+    
+    @staticmethod
+    def aplicar_filtro_laplaciano(imagen: ImagenData):
+        """
+        Aplica filtro Laplaciano en el dominio espacial.
+        """
+        imagen_gris = imagen.imagen_modified[:, :, 0]
+        laplaciano = cv2.Laplacian(imagen_gris, cv2.CV_64F)
+        abs_laplaciano = cv2.convertScaleAbs(laplaciano)
+        
+        imagen.imagen_modified = cv2.merge((abs_laplaciano, abs_laplaciano, abs_laplaciano))
+        
+        return ProcesadorImagen.convertir_imagen_tk(imagen.imagen_modified)
+    
+    @staticmethod
+    def aplicar_filtro_laplaciano_8(imagen: ImagenData):
+        """
+        Aplica filtro Laplaciano de 8 vecinos
+        """
+        imagen_gris = imagen.imagen_modified[:, :, 0]
+        
+        laplacian_kernel_8 = np.array([[1, 1, 1],
+                                       [1, -8, 1],
+                                       [1, 1, 1]], dtype=np.float32)
+        
+        laplacian = cv2.filter2D(imagen_gris, cv2.CV_32F, laplacian_kernel_8)
+        
+        abs_laplacian = cv2.convertScaleAbs(laplacian)
+        
+        imagen.imagen_modified = cv2.merge((abs_laplacian, abs_laplacian, abs_laplacian))
+        
+        return ProcesadorImagen.convertir_imagen_tk(imagen.imagen_modified)
+    
+    @staticmethod
+    def aplicar_filtro_kirsch(imagen: ImagenData):
+        """
+        Aplica filtro Kirsch en el dominio espacial.
+        """
+        imagen_gris = imagen.imagen_modified[:, :, 0]
+        kirsch_kernels = [
+            np.array([[5, 5, 5], [-3, 0, -3], [-3, -3, -3]], dtype=np.float32),
+            np.array([[5, 5, -3], [5, 0, -3], [-3, -3, -3]], dtype=np.float32),
+            np.array([[5, -3, -3], [5, 0, -3], [5, -3, -3]], dtype=np.float32),
+            np.array([[-3, -3, -3], [5, 0, -3], [5, 5, -3]], dtype=np.float32),
+            np.array([[-3, -3, -3], [-3, 0, -3], [5, 5, 5]], dtype=np.float32),
+            np.array([[-3, -3, -3], [-3, 0, 5], [-3, 5, 5]], dtype=np.float32),
+            np.array([[-3, -3, 5], [-3, 0, 5], [-3, -3, 5]], dtype=np.float32),
+            np.array([[-3, 5, 5], [-3, 0, 5], [-3, -3, -3]], dtype=np.float32)
+        ]
+        
+        max_response = np.zeros_like(imagen_gris, dtype=np.float32)
+        for kernel in kirsch_kernels:
+            response = cv2.filter2D(imagen_gris, cv2.CV_32F, kernel)
+            max_response = np.maximum(max_response, response)
+        
+        abs_kirsch = cv2.convertScaleAbs(max_response)
+        imagen.imagen_modified = cv2.merge((abs_kirsch, abs_kirsch, abs_kirsch))
         
         return ProcesadorImagen.convertir_imagen_tk(imagen.imagen_modified)

@@ -1,8 +1,25 @@
 from Modelos.ImagenModel import ImageModel
 from Vistas.mainWindow import MainWindow 
 
+"""
+Controlador principal de la aplicación.
+Maneja la interacción entre la vista (MainWindow) y el modelo (ImageModel).
+"""
+
 class ImageController:
+    """
+    Clase Controlador que gestiona la lógica de la aplicación y la comunicación
+    entre la interfaz de usuario y el modelo de datos.
+    """
     def __init__(self, model, view):
+        """
+        Inicializa el controlador con el modelo y la vista.
+        Conecta los eventos de los botones de la interfaz.
+        
+        Args:
+            model (ImageModel): Instancia del modelo de la imagen.
+            view (MainWindow): Instancia de la ventana principal.
+        """
         self.model = model
         self.view = view
         self.conectar_eventos_basicos()
@@ -10,6 +27,9 @@ class ImageController:
         self.conectar_eventos_filtros()
 
     def conectar_eventos_basicos(self):
+        """
+        Conecta los eventos de los botones de la pestaña principal (Cargar, Guardar, Reiniciar, etc.).
+        """
         self.tabulador_main = self.view.tabulator_main
         self.tabulador_main.button_cargar_img1.config(command= lambda: self.cargar_imagen(1))
         self.tabulador_main.button_cargar_img2.config(command= lambda: self.cargar_imagen(2))
@@ -25,6 +45,9 @@ class ImageController:
         self.tabulador_main.button_guardar_img2.config(command= lambda: self.guardar_imagen(2))
 
     def conectar_eventos_operaciones(self):
+        """
+        Conecta los eventos de los botones de la pestaña de operaciones aritméticas y lógicas.
+        """
         self.tabulator_operations = self.view.tabulator_operations
         self.tabulator_operations.boton_sumar_escalar_img1.config(command= lambda: self.operacion_aritmetica_escalar("suma", 1))
         self.tabulator_operations.boton_restar_escalar_img1.config(command= lambda: self.operacion_aritmetica_escalar("resta", 1))
@@ -53,6 +76,9 @@ class ImageController:
         self.tabulator_operations.boton_xor_logico_img2.config(command= lambda: self.operacion_logica_entre_imagenes("xor", 2, 1))
 
     def conectar_eventos_filtros(self):
+        """
+        Conecta los eventos de los botones de la pestaña de filtros y ruido.
+        """
         self.tabulator_filters= self.view.tabulator_filters
         self.tabulator_filters.boton_agregar_ruido_sal_y_pimienta_Img1.config(command= lambda: self.agregar_ruido("sal y pimienta",1))
         self.tabulator_filters.boton_agregar_ruido_sal_y_pimienta_Img2.config(command= lambda: self.agregar_ruido("sal y pimienta",2))
@@ -62,6 +88,12 @@ class ImageController:
         self.tabulator_filters.boton_aplicar_filtro_Img2.config(command= lambda: self.aplicar_filtro(2))
 
     def cargar_imagen(self, numero_imagen):
+        """
+        Maneja la carga de una imagen desde el sistema de archivos.
+        
+        Args:
+            numero_imagen (int): Identificador de la imagen (1 o 2).
+        """
         rutaArchivo = self.tabulador_main.pedir_ruta_archivo()
         if rutaArchivo:
             imagen_creada = self.model.crear_imagen(rutaArchivo, numero_imagen)
@@ -73,6 +105,12 @@ class ImageController:
             self.view.mostrar_mensaje("No se seleccionó ninguna imagen.", "info")
 
     def guardar_imagen(self, numero_imagen):
+        """
+        Maneja el guardado de la imagen actual en el sistema de archivos.
+        
+        Args:
+            numero_imagen (int): Identificador de la imagen (1 o 2).
+        """
         if not self.model.checar_existencia_imagen(numero_imagen):
             self.view.mostrar_mensaje("No se tiene cargada una imagen.", "info")
             return
@@ -83,6 +121,12 @@ class ImageController:
             self.view.mostrar_mensaje("No se seleccionó ninguna imagen.", "info")
 
     def reiniciar_imagen(self, numero_imagen):
+        """
+        Reinicia la imagen a su estado original.
+        
+        Args:
+            numero_imagen (int): Identificador de la imagen (1 o 2).
+        """
         if not self.model.checar_existencia_imagen(numero_imagen):
             self.view.mostrar_mensaje("No se tiene cargada una imagen.", "info")
             return
@@ -90,6 +134,12 @@ class ImageController:
         self.view.actualizar_imagen(imagen_reiniciada[0], imagen_reiniciada[1], numero_imagen, "rgb")
     
     def convertir_grises(self, numero_imagen):
+        """
+        Convierte la imagen seleccionada a escala de grises.
+        
+        Args:
+            numero_imagen (int): Identificador de la imagen (1 o 2).
+        """
         if not self.model.checar_existencia_imagen(numero_imagen):
             self.view.mostrar_mensaje("No se tiene cargada una imagen.", "info")
             return
@@ -97,6 +147,12 @@ class ImageController:
         self.view.actualizar_imagen(imagen_convertida[0], imagen_convertida[1], numero_imagen, "gris")
     
     def binarizar_fijo(self, numero_imagen):
+        """
+        Aplica binarización con un umbral fijo ingresado por el usuario.
+        
+        Args:
+            numero_imagen (int): Identificador de la imagen (1 o 2).
+        """
         if not self.model.checar_existencia_imagen(numero_imagen):
             self.view.mostrar_mensaje("No se tiene cargada una imagen.", "info")
             return
@@ -112,6 +168,12 @@ class ImageController:
             self.view.actualizar_imagen(imagen_binarizada[0], imagen_binarizada[1], numero_imagen, "binaria")
 
     def binarizar_otsu(self, numero_imagen):
+        """
+        Aplica binarización utilizando el método de Otsu para calcular el umbral automáticamente.
+        
+        Args:
+            numero_imagen (int): Identificador de la imagen (1 o 2).
+        """
         if not self.model.checar_existencia_imagen(numero_imagen):
             self.view.mostrar_mensaje("No se tiene cargada una imagen.", "info")
             return
@@ -123,6 +185,13 @@ class ImageController:
         self.view.actualizar_imagen(imagen_binarizada[0], imagen_binarizada[1], numero_imagen, "binaria")
 
     def operacion_aritmetica_escalar(self, operacion, numero_imagen):
+        """
+        Realiza operaciones aritméticas (suma, resta, multiplicación) con un valor escalar.
+        
+        Args:
+            operacion (str): Tipo de operación ('suma', 'resta', 'multiplicacion').
+            numero_imagen (int): Identificador de la imagen (1 o 2).
+        """
         if not self.model.checar_existencia_imagen(numero_imagen):
             self.view.mostrar_mensaje("No se tiene cargada una imagen.", "info")
             return
@@ -149,6 +218,14 @@ class ImageController:
         self.view.actualizar_imagen(imagen_operada[0], imagen_operada[1], numero_imagen, imagen_operada[2])
         
     def operacion_aritmetica_entre_imagenes(self, operacion, numero_imagen_1, numero_imagen_2):
+        """
+        Realiza operaciones aritméticas entre dos imágenes.
+        
+        Args:
+            operacion (str): Tipo de operación ('suma', 'resta', 'multiplicacion').
+            numero_imagen_1 (int): Identificador de la primera imagen.
+            numero_imagen_2 (int): Identificador de la segunda imagen.
+        """
         if not self.model.checar_existencia_imagen(numero_imagen_1) and not self.model.checar_existencia_imagen(numero_imagen_2):
             self.view.mostrar_mensaje("No se tiene cargada ninguna imagen, se requieren dos imágenes", "info")
             return
@@ -161,6 +238,14 @@ class ImageController:
         self.view.actualizar_imagen(imagen_operada[0], imagen_operada[1], numero_imagen_1, imagen_operada[2])
     
     def operacion_logica_entre_imagenes(self, operacion, numero_imagen_1, numero_imagen_2):
+        """
+        Realiza operaciones lógicas (AND, OR, XOR) entre dos imágenes.
+        
+        Args:
+            operacion (str): Tipo de operación ('and', 'or', 'xor').
+            numero_imagen_1 (int): Identificador de la primera imagen.
+            numero_imagen_2 (int): Identificador de la segunda imagen.
+        """
         if not self.model.checar_existencia_imagen(numero_imagen_1) and not self.model.checar_existencia_imagen(numero_imagen_2):
             self.view.mostrar_mensaje("No se tiene cargada ninguna imagen, se requieren dos imágenes", "info")
             return
@@ -173,6 +258,12 @@ class ImageController:
         self.view.actualizar_imagen(imagen_operada[0], imagen_operada[1], numero_imagen_1, imagen_operada[2])
     
     def operacion_not(self, numero_imagen):
+        """
+        Aplica la operación lógica NOT (inversión) a una imagen.
+        
+        Args:
+            numero_imagen (int): Identificador de la imagen (1 o 2).
+        """
         if not self.model.checar_existencia_imagen(numero_imagen):
             self.view.mostrar_mensaje("No se tiene cargada la imagen", "info")
             return
@@ -181,6 +272,13 @@ class ImageController:
         self.view.actualizar_imagen(imagen_operada[0], imagen_operada[1], numero_imagen, imagen_operada[2])
 
     def agregar_ruido(self, tipo_ruido, numero_imagen):
+        """
+        Agrega ruido a la imagen seleccionada.
+        
+        Args:
+            tipo_ruido (str): Tipo de ruido ('sal y pimienta', 'gaussiano').
+            numero_imagen (int): Identificador de la imagen (1 o 2).
+        """
         if not self.model.checar_existencia_imagen(numero_imagen):
             self.view.mostrar_mensaje("No se tiene cargada la imagen", "info")
             return
@@ -189,6 +287,12 @@ class ImageController:
         self.view.actualizar_imagen(imagen_operada[0], imagen_operada[1], numero_imagen, imagen_operada[2])
 
     def aplicar_filtro(self, numero_imagen):
+        """
+        Aplica un filtro seleccionado a la imagen.
+        
+        Args:
+            numero_imagen (int): Identificador de la imagen (1 o 2).
+        """
         valor_umbral_minimo = None
         valor_umbral_maximo = None
         if not self.model.checar_existencia_imagen(numero_imagen):
@@ -208,7 +312,7 @@ class ImageController:
         if filtro in ["Filtro Bilateral", "Filtro de Mediana Adaptativa", "Filtro de Media Contraharmonica", "Filtro de Mediana Ponderada"]:
             self.view.mostrar_mensaje("Aviso: El filtro seleccionado requiere de una mayor cantidad de tiempo de procesado, por tanto se recomienda que si el programa deje de responder, espere hasta que el filtro termine de procesar la imagen", "info")            
         
-        if filtro in ["Filtro de Sobel", "Filtro de Prewitt", "Filtro de Roberts", "Filtro de Canny", "Filtro Kirsch", "Filtro Laplaciano"]:
+        if filtro in ["Filtro de Sobel", "Filtro de Prewitt", "Filtro de Roberts", "Filtro de Canny", "Filtro Kirsch", "Filtro Laplaciano", "Filtro Ideal Pasa Bajo", "Filtro Ideal Pasa Alto"]:
             if self.model.determinar_tipo_imagen(numero_imagen) != 'gris':
                 self.view.mostrar_mensaje("El filtro seleccionado requiere que la imagen sea en escala de grises", "info")
                 return
