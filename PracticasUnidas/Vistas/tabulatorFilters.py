@@ -9,7 +9,7 @@ class TabulatorFilters(ttk.Frame):
     def __init__(self, parent):
         super().__init__(parent)
 
-        for i in range(1,2): self.rowconfigure(i, weight=1)
+        for i in range(1,3): self.rowconfigure(i, weight=1)
         self.columnconfigure(0, weight=1)
 
         self.label_titulo = ttk.Label(self, text="Operaciones de ruido y filtros", font=("Arial", 18, "bold"))
@@ -139,6 +139,6 @@ class TabulatorFilters(ttk.Frame):
         Returns:
             tuple: (valor_umbral_minimo, valor_umbral_maximo) ingresados por el usuario.
         """
-        valor_umbral_minimo = simpledialog.askinteger("Canny", "Ingrese el valor minimo del umbral (0-255):", minvalue=0, maxvalue=255)
-        valor_umbral_maximo = simpledialog.askinteger("Canny", "Ingrese el valor maximo del umbral (0-255):", minvalue=0, maxvalue=255)
+        valor_umbral_minimo = simpledialog.askinteger("Canny", "Ingrese el valor minimo del umbral (0-255):", minvalue=0, maxvalue=255, parent=self)
+        valor_umbral_maximo = simpledialog.askinteger("Canny", "Ingrese el valor maximo del umbral (0-255):", minvalue=0, maxvalue=255, parent=self)
         return valor_umbral_minimo, valor_umbral_maximo

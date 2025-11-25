@@ -4,6 +4,7 @@ from Utilidades.ImagenData import ImagenData
 import cv2
 from PIL import ImageTk
 from scipy import ndimage
+from scipy.signal import find_peaks
 
 MENSAJES_ERROR = {
     FileNotFoundError: "No se encontró la imagen en la ruta especificada.",
@@ -55,7 +56,7 @@ class ProcesadorImagen:
         imagen_auxiliar = imagen.imagen_modified[:, :, 0]
         _, imagen_auxiliar = cv2.threshold(imagen_auxiliar, umbral, 255, cv2.THRESH_BINARY)
         imagen.imagen_modified = cv2.merge([imagen_auxiliar, imagen_auxiliar, imagen_auxiliar])
-        imagen.tipo = 'binario'
+        imagen.tipo = 'binaria'
         return ProcesadorImagen.convertir_imagen_tk(imagen.imagen_modified)
     
     @staticmethod
@@ -63,7 +64,7 @@ class ProcesadorImagen:
         imagen_auxiliar = imagen.imagen_modified[:, :, 0]
         _, imagen_auxiliar = cv2.threshold(imagen_auxiliar, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
         imagen.imagen_modified = cv2.merge([imagen_auxiliar, imagen_auxiliar, imagen_auxiliar])
-        imagen.tipo = 'binario'
+        imagen.tipo = 'binaria'
         return ProcesadorImagen.convertir_imagen_tk(imagen.imagen_modified)
 
     @staticmethod
@@ -86,11 +87,11 @@ class ProcesadorImagen:
             return 'rgb'
         if tipo_imagen_1 == 'gris' and tipo_imagen_2 == 'gris':
             return 'gris'
-        if tipo_imagen_1 == 'binario' and tipo_imagen_2 == 'binario':
-            return 'binario'
-        if (tipo_imagen_1 == 'gris' and tipo_imagen_2 == 'binario') or (tipo_imagen_1 == 'binario' and tipo_imagen_2 == 'gris'):
+        if tipo_imagen_1 == 'binaria' and tipo_imagen_2 == 'binaria':
+            return 'binaria'
+        if (tipo_imagen_1 == 'gris' and tipo_imagen_2 == 'binaria') or (tipo_imagen_1 == 'binaria' and tipo_imagen_2 == 'gris'):
             return 'gris'
-        if (tipo_imagen_1 == 'rgb' and tipo_imagen_2 == 'binario') or (tipo_imagen_1 == 'binario' and tipo_imagen_2 == 'rgb') or (tipo_imagen_1 == 'rgb' and tipo_imagen_2 == 'gris') or (tipo_imagen_1 == 'gris' and tipo_imagen_2 == 'rgb'):
+        if (tipo_imagen_1 == 'rgb' and tipo_imagen_2 == 'binaria') or (tipo_imagen_1 == 'binaria' and tipo_imagen_2 == 'rgb') or (tipo_imagen_1 == 'rgb' and tipo_imagen_2 == 'gris') or (tipo_imagen_1 == 'gris' and tipo_imagen_2 == 'rgb'):
             return 'rgb'
 
     @staticmethod
@@ -531,3 +532,136 @@ class ProcesadorImagen:
         imagen.imagen_modified = cv2.merge((abs_kirsch, abs_kirsch, abs_kirsch))
         
         return ProcesadorImagen.convertir_imagen_tk(imagen.imagen_modified)
+    
+    @staticmethod
+    def aplicar_segmentacion(metodo_segmentacion,imagen: ImagenData, umbral1, umbral2):
+        if metodo_segmentacion == "otsu":
+            #Solo en este caso se aplica un return debido a que este metodo regresa la imagen binarizada
+            return ProcesadorImagen.binarizar_metodo_otsu(imagen)
+        elif metodo_segmentacion == "Metodo de entropía de Kapur":
+            ProcesadorImagen.aplicar_segmentacion_entropia_kapur(imagen)
+        elif metodo_segmentacion == "Método de mínimo de histograma":
+            ProcesadorImagen.aplicar_segmentacion_minimo_histograma(imagen)
+        elif metodo_segmentacion == "Método de la media":
+            ProcesadorImagen.aplicar_segmentacion_media(imagen)
+        elif metodo_segmentacion == "Método de dos umbrales":
+            ProcesadorImagen.aplicar_segmentacion_dos_umbrales(imagen, umbral1, umbral2)
+        elif metodo_segmentacion == "Método de umbral de banda":
+            ProcesadorImagen.aplicar_segmentacion_umbral_banda(imagen, umbral1, umbral2)
+
+        return ProcesadorImagen.convertir_imagen_tk(imagen.imagen_modified)
+    
+    def aplicar_segmentacion_entropia_kapur(imagen: ImagenData):
+        imagen_gris = imagen.imagen_modified[:, :, 0]
+        histograma, _ = np.histogram(imagen_gris, bins=256, range=(0, 256))
+        total_pixeles = imagen_gris.size
+
+        max_entropia = -1
+        umbral_optimo = 0
+
+        for t in range(256):
+            clase1 = histograma[:t]
+            clase2 = histograma[t:]
+            p1 = np.sum(clase1) / total_pixeles
+            p2 = np.sum(clase2) / total_pixeles
+            if p1 == 0 or p2 == 0:
+                continue
+            entropia1 = -np.sum((clase1 / np.sum(clase1)) * np.log(clase1 / np.sum(clase1) + 1e-10))
+            entropia2 = -np.sum((clase2 / np.sum(clase2)) * np.log(clase2 / np.sum(clase2) + 1e-10))
+
+            entropia_total = p1 * entropia1 + p2 * entropia2
+            if entropia_total > max_entropia:
+                max_entropia = entropia_total
+                umbral_optimo = t
+
+        imagen_kapur = (imagen_gris > umbral_optimo).astype(np.uint8) * 255
+        imagen.imagen_modified = cv2.merge((imagen_kapur, imagen_kapur, imagen_kapur))
+        imagen.tipo = "binaria"
+
+    def aplicar_segmentacion_minimo_histograma(imagen: ImagenData):
+        imagen_gris = imagen.imagen_modified[:, :, 0]
+        histograma, _ = np.histogram(imagen_gris, bins=256, range=(0, 256))
+        picos, _ = find_peaks(histograma, distance=20)
+        minimo = np.argmin(histograma[picos[0]:picos[1]]) + picos[0]
+        imagen_minimo = (imagen_gris > minimo).astype(np.uint8) * 255
+        imagen.imagen_modified = cv2.merge((imagen_minimo, imagen_minimo, imagen_minimo))
+        imagen.tipo = "binaria"
+    
+    def aplicar_segmentacion_media(imagen: ImagenData):
+        imagen_gris = imagen.imagen_modified[:, :, 0]
+        umbral = np.mean(imagen_gris)
+        imagen_media = (imagen_gris > umbral).astype(np.uint8) * 255
+        imagen.imagen_modified = cv2.merge((imagen_media, imagen_media, imagen_media))
+        imagen.tipo = "binaria"
+
+    def aplicar_segmentacion_dos_umbrales(imagen: ImagenData, umbral1, umbral2):
+        imagen_gris = imagen.imagen_modified[:, :, 0]
+        imagen_multi_umbrales = np.zeros_like(imagen_gris)
+        imagen_multi_umbrales[imagen_gris < umbral1] = 0
+        imagen_multi_umbrales[(imagen_gris >= umbral1) & (imagen_gris < umbral2)] = 127
+        imagen_multi_umbrales[imagen_gris >= umbral2] = 255
+        imagen.imagen_modified = cv2.merge((imagen_multi_umbrales, imagen_multi_umbrales, imagen_multi_umbrales))
+        imagen.tipo = "gris"
+
+    def aplicar_segmentacion_umbral_banda(imagen: ImagenData, umbral1, umbral2):
+        imagen_gris = imagen.imagen_modified[:, :, 0]
+        imagen_umbral_banda = np.zeros_like(imagen_gris)
+        imagen_umbral_banda[(imagen_gris >= umbral1) & (imagen_gris <= umbral2)] = 255
+        imagen.imagen_modified = cv2.merge((imagen_umbral_banda, imagen_umbral_banda, imagen_umbral_banda))
+        imagen.tipo = "binaria"
+
+    @staticmethod
+    def aplicar_ajuste_brillo(metodo_ajuste_brillo,imagen: ImagenData, valor):
+        if metodo_ajuste_brillo == "Ecualización uniforme":
+            ProcesadorImagen.ecualizacion_uniforme(imagen)
+        if metodo_ajuste_brillo == "Ecualización exponencial":
+            ProcesadorImagen.ecualizacion_exponencial(imagen)
+        if metodo_ajuste_brillo == "Ecualización Rayleigh":
+            ProcesadorImagen.ecualizacion_rayleigh(imagen)
+        if metodo_ajuste_brillo == "Ecualización hipercúbica":
+            ProcesadorImagen.ecualizacion_hipercubica(imagen, valor)
+        if metodo_ajuste_brillo == "Ecualización logarítmica hiperbólica":
+            ProcesadorImagen.ecualizacion_logaritmica_hiperbolica(imagen)
+        if metodo_ajuste_brillo == "Función exponencial":
+            ProcesadorImagen.funcion_exponencial(imagen, valor)
+        if metodo_ajuste_brillo == "Corrección gamma":
+            ProcesadorImagen.correccion_gamma(imagen, valor)
+
+        return ProcesadorImagen.convertir_imagen_tk(imagen.imagen_modified)
+
+    def ecualizacion_uniforme(imagen: ImagenData):
+        imagen_gris = imagen.imagen_modified[:, :, 0]
+        imagen_ecualizada = cv2.equalizeHist(imagen_gris)
+        imagen.imagen_modified = cv2.merge((imagen_ecualizada, imagen_ecualizada, imagen_ecualizada))
+
+    def ecualizacion_exponencial(imagen: ImagenData):
+        imagen_gris = imagen.imagen_modified[:, :, 0]
+        imagen_exponenciada = np.uint8(255 * (1 - np.exp(-imagen_gris / 255)))
+        imagen.imagen_modified = cv2.merge((imagen_exponenciada, imagen_exponenciada, imagen_exponenciada))
+
+    def ecualizacion_rayleigh(imagen: ImagenData):
+        imagen_gris = imagen.imagen_modified[:, :, 0]
+        imagen_rayleigh = np.uint8(255 * np.sqrt(imagen_gris / 255))
+        imagen.imagen_modified = cv2.merge((imagen_rayleigh, imagen_rayleigh, imagen_rayleigh))
+
+    def ecualizacion_hipercubica(imagen: ImagenData, potencia=4):
+        imagen_gris = imagen.imagen_modified[:, :, 0]
+        imagen_hipercubica = np.uint8(255 * (imagen_gris / 255) ** potencia)
+        imagen.imagen_modified = cv2.merge((imagen_hipercubica, imagen_hipercubica, imagen_hipercubica))
+
+    def ecualizacion_logaritmica_hiperbolica(imagen: ImagenData):
+        imagen_gris = imagen.imagen_modified[:, :, 0]
+        imagen_logaritmica = np.uint8(255 * np.log1p(imagen_gris) / np.log1p(255))
+        imagen.imagen_modified = cv2.merge((imagen_logaritmica, imagen_logaritmica, imagen_logaritmica))
+
+    def funcion_exponencial(imagen: ImagenData, potencia=2):
+        imagen_gris = imagen.imagen_modified[:, :, 0]
+        imagen_exponencial = np.uint8(255 * (imagen_gris / 255) ** potencia)
+        imagen.imagen_modified = cv2.merge((imagen_exponencial, imagen_exponencial, imagen_exponencial))
+
+    def correccion_gamma(imagen: ImagenData, gamma=1.5):
+        imagen_gris = imagen.imagen_modified[:, :, 0]
+        imagen_gamma = np.power(imagen_gris / 255.0, gamma) * 255
+        imagen_gamma = np.uint8(imagen_gamma)
+        imagen.imagen_modified = cv2.merge((imagen_gamma, imagen_gamma, imagen_gamma))
+

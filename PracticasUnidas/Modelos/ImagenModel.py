@@ -288,3 +288,46 @@ class ImageModel:
         """
         imagen = self._determinarImagen(numero_imagen)
         return imagen.tipo
+
+    def aplicar_segmentacion(self, tipo_segmentacion, numero_imagen, valor_umbral_1 = None, valor_umbral_2 = None):
+        """
+        Aplica un filtro de segmentacion a la imagen.
+        
+        Args:
+            tipo_segmentacion (str): Nombre del filtro.
+            numero_imagen (int): Identificador de la imagen.
+            valor_umbral_1 (int, optional): Umbral mínimo (para Canny) o Radio (D0) para filtros de frecuencia.
+            valor_umbral_maximo (int, optional): Umbral máximo (para Canny).
+            
+        Returns:
+            tuple: Imagen resultante, histograma y tipo de imagen.
+        """
+        histograma = None
+        imagen = self._determinarImagen(numero_imagen)
+
+        resultado_operacion = ProcesadorImagen.aplicar_segmentacion(tipo_segmentacion, imagen, valor_umbral_1, valor_umbral_2)
+        if tipo_segmentacion == "Método de dos umbrales":
+            histograma = ProcesadorImagen.calcular_histograma_gris(imagen.imagen_modified)
+        else:
+            histograma = None
+
+        return (resultado_operacion, histograma, imagen.tipo)
+
+    def aplicar_ajuste_brillo(self, tipo_ajuste, numero_imagen, valor_operacion= None):
+        """
+        Aplica un ajuste de brillo a la imagen.
+        
+        Args:
+            tipo_ajuste (str): Nombre del ajuste.
+            numero_imagen (int): Identificador de la imagen.
+            valor_operacion (int, optional): Valor de la operacion.
+            
+        Returns:
+            tuple: Imagen resultante, histograma y tipo de imagen.
+        """
+        imagen = self._determinarImagen(numero_imagen)
+
+        resultado_operacion = ProcesadorImagen.aplicar_ajuste_brillo(tipo_ajuste, imagen, valor_operacion)
+        histograma = ProcesadorImagen.calcular_histograma_gris(imagen.imagen_modified)
+        return (resultado_operacion, histograma, imagen.tipo)
+        

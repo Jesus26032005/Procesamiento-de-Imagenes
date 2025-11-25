@@ -25,6 +25,8 @@ class ImageController:
         self.conectar_eventos_basicos()
         self.conectar_eventos_operaciones()
         self.conectar_eventos_filtros()
+        self.conectar_eventos_segmentacion()
+        self.conectar_eventos_ajuste_brillo()
 
     def conectar_eventos_basicos(self):
         """
@@ -86,6 +88,41 @@ class ImageController:
         self.tabulator_filters.boton_agregar_ruido_gaussiano_Img2.config(command= lambda: self.agregar_ruido("gaussiano",2))
         self.tabulator_filters.boton_aplicar_filtro_Img1.config(command= lambda: self.aplicar_filtro(1))
         self.tabulator_filters.boton_aplicar_filtro_Img2.config(command= lambda: self.aplicar_filtro(2))
+
+    def conectar_eventos_segmentacion(self):
+        """
+        Conecta los eventos de los botones de la pestaña de segmentación.
+        """
+        self.tabulator_segmentation = self.view.tabulator_segmentation
+        self.tabulator_segmentation.boton_segmentacion_otsu_img1.config(command= lambda: self.aplicar_segmentacion("otsu",1))
+        self.tabulator_segmentation.boton_segmentacion_otsu_img2.config(command= lambda: self.aplicar_segmentacion("otsu",2))
+        self.tabulator_segmentation.boton_segmentacion_entropia_kapur_img1.config(command= lambda: self.aplicar_segmentacion("Metodo de entropía de Kapur",1))
+        self.tabulator_segmentation.boton_segmentacion_entropia_kapur_img2.config(command= lambda: self.aplicar_segmentacion("Metodo de entropía de Kapur",2))
+        self.tabulator_segmentation.boton_minimo_histograma_img1.config(command= lambda: self.aplicar_segmentacion("Método de mínimo de histograma",1))
+        self.tabulator_segmentation.boton_minimo_histograma_img2.config(command= lambda: self.aplicar_segmentacion("Método de mínimo de histograma",2))
+        self.tabulator_segmentation.boton_segmentacion_media_img1.config(command= lambda: self.aplicar_segmentacion("Método de la media",1))
+        self.tabulator_segmentation.boton_segmentacion_media_img2.config(command= lambda: self.aplicar_segmentacion("Método de la media",2))
+        self.tabulator_segmentation.boton_segmentacion_dos_umbrales_img1.config(command= lambda: self.aplicar_segmentacion("Método de dos umbrales",1))
+        self.tabulator_segmentation.boton_segmentacion_dos_umbrales_img2.config(command= lambda: self.aplicar_segmentacion("Método de dos umbrales",2))
+        self.tabulator_segmentation.boton_segmentacion_umbral_banda_img1.config(command= lambda: self.aplicar_segmentacion("Método de umbral de banda",1))
+        self.tabulator_segmentation.boton_segmentacion_umbral_banda_img2.config(command= lambda: self.aplicar_segmentacion("Método de umbral de banda",2))
+
+    def conectar_eventos_ajuste_brillo(self):
+        self.tabulator_brightness = self.view.tabulator_brightness
+        self.tabulator_brightness.boton_ecualizacion_uniforme_img1.config(command= lambda: self.aplicar_ajuste_brillo("Ecualización uniforme",1))
+        self.tabulator_brightness.boton_ecualizacion_uniforme_img2.config(command= lambda: self.aplicar_ajuste_brillo("Ecualización uniforme",2))
+        self.tabulator_brightness.boton_ecualizacion_exponencial_img1.config(command= lambda: self.aplicar_ajuste_brillo("Ecualización exponencial",1))
+        self.tabulator_brightness.boton_ecualizacion_exponencial_img2.config(command= lambda: self.aplicar_ajuste_brillo("Ecualización exponencial",2))
+        self.tabulator_brightness.boton_ecualizacion_Rayleigh_img1.config(command= lambda: self.aplicar_ajuste_brillo("Ecualización Rayleigh",1))
+        self.tabulator_brightness.boton_ecualizacion_Rayleigh_img2.config(command= lambda: self.aplicar_ajuste_brillo("Ecualización Rayleigh",2))
+        self.tabulator_brightness.boton_ecualizacion_hipercubica_img1.config(command= lambda: self.aplicar_ajuste_brillo("Ecualización hipercúbica",1))
+        self.tabulator_brightness.boton_ecualizacion_hipercubica_img2.config(command= lambda: self.aplicar_ajuste_brillo("Ecualización hipercúbica",2))
+        self.tabulator_brightness.boton_ecualizacion_logaritmica_hiperbolica_img1.config(command= lambda: self.aplicar_ajuste_brillo("Ecualización logarítmica hiperbólica",1))
+        self.tabulator_brightness.boton_ecualizacion_logaritmica_hiperbolica_img2.config(command= lambda: self.aplicar_ajuste_brillo("Ecualización logarítmica hiperbólica",2))
+        self.tabulator_brightness.boton_funcion_exponencial_img1.config(command= lambda: self.aplicar_ajuste_brillo("Función exponencial",1))
+        self.tabulator_brightness.boton_funcion_exponencial_img2.config(command= lambda: self.aplicar_ajuste_brillo("Función exponencial",2))
+        self.tabulator_brightness.boton_correccion_gamma_img1.config(command= lambda: self.aplicar_ajuste_brillo("Corrección gamma",1))
+        self.tabulator_brightness.boton_correccion_gamma_img2.config(command= lambda: self.aplicar_ajuste_brillo("Corrección gamma",2))
 
     def cargar_imagen(self, numero_imagen):
         """
@@ -325,3 +362,46 @@ class ImageController:
 
         imagen_operada = self.model.aplicar_filtro(filtro, numero_imagen, valor_umbral_minimo, valor_umbral_maximo)
         self.view.actualizar_imagen(imagen_operada[0], imagen_operada[1], numero_imagen, imagen_operada[2])
+
+    def aplicar_segmentacion(self, tipo_segmentacion, numero_imagen):
+        valor_umbral_1 = None
+        valor_umbral_2 = None
+
+        if not self.model.checar_existencia_imagen(numero_imagen):
+            self.view.mostrar_mensaje("No se tiene cargada la imagen", "info")
+            return
+
+        if self.model.determinar_tipo_imagen(numero_imagen) != 'gris':
+            self.view.mostrar_mensaje("El segmento seleccionado requiere que la imagen sea en escala de grises", "info")
+            return
+
+        if tipo_segmentacion == "Método de umbral de banda" or tipo_segmentacion == "Método de dos umbrales":
+            if tipo_segmentacion == "Método de umbral de banda":
+                valor_umbral_1, valor_umbral_2 = self.view.tabulator_segmentation.pedir_valor_umbrales("umbral de banda")
+            else:
+                valor_umbral_1, valor_umbral_2 = self.view.tabulator_segmentation.pedir_valor_umbrales("dos umbrales")
+            if not valor_umbral_1 or not valor_umbral_2:
+                self.view.mostrar_mensaje("No se ingresaron valores validos", "info")
+                return
+
+        imagen_segmentada = self.model.aplicar_segmentacion(tipo_segmentacion, numero_imagen, valor_umbral_1, valor_umbral_2)
+        self.view.actualizar_imagen(imagen_segmentada[0], imagen_segmentada[1], numero_imagen, imagen_segmentada[2])
+
+    def aplicar_ajuste_brillo(self, tipo_ajuste,numero_imagen):
+        if not self.model.checar_existencia_imagen(numero_imagen):
+            self.view.mostrar_mensaje("No se tiene cargada la imagen", "info")
+            return
+
+        if self.model.determinar_tipo_imagen(numero_imagen) != 'gris':
+            self.view.mostrar_mensaje("El ajuste de brillo requiere que la imagen sea en escala de grises", "info")
+            return
+
+        valor_operacion = None
+        if tipo_ajuste in ["Ecualización hipercúbica", "Función exponencial", "Corrección gamma"]:
+            valor_operacion = self.view.tabulator_brightness.pedir_valor_operacion(tipo_ajuste)
+            if not valor_operacion:
+                self.view.mostrar_mensaje("No se ingresaron valores validos", "info")
+                return
+
+        imagen_ajustada = self.model.aplicar_ajuste_brillo(tipo_ajuste, numero_imagen, valor_operacion)
+        self.view.actualizar_imagen(imagen_ajustada[0], imagen_ajustada[1], numero_imagen, imagen_ajustada[2])

@@ -4,7 +4,7 @@ class TabulatorOperations(ttk.Frame):
     def __init__(self, parent):
         super().__init__(parent)
         
-        for i in range(1,2): self.rowconfigure(i, weight=1)
+        for i in range(1,3): self.rowconfigure(i, weight=1)
         self.columnconfigure(0, weight=1)
 
         self.label_titulo = ttk.Label(self, text="Operaciones aritmeticas y logicas", font=("Arial", 18, "bold"))
