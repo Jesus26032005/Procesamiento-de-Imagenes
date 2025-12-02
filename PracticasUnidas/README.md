@@ -76,3 +76,7 @@ pip install opencv-python numpy pillow ttkbootstrap matplotlib scipy
 ## Autor
 
 Desarrollado como parte de las prácticas de la asignatura de Procesamiento de Imágenes.
+Autor: Martinez Alor Zaddkiel de Jesus
+Semestre: Cuarto semestre
+Institucion: Instituto Politecnico Nacional-ESCOM
+Version: 1.0
