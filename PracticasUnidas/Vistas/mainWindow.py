@@ -241,7 +241,7 @@ class MainWindow(ttk.Window):
                 self.crear_histograma_rgb(no_imagen, histograma, modalidad="modificada")
             elif tipo_imagen == 'gris':
                 self.crear_histograma_gris(no_imagen, histograma)
-            elif tipo_imagen == 'binaria':
+            elif tipo_imagen == 'binaria' or tipo_imagen == 'componentes':
                 # Las imágenes binarias no suelen mostrar histograma detallado en esta vista
                 ubicacion, noGrid = self.determinar_ubicacion_grid_img(no_imagen, modalidad="modificada")
                 for i in range(3):
@@ -255,7 +255,7 @@ class MainWindow(ttk.Window):
                 self.crear_histograma_rgb(no_imagen, histograma, modalidad="modificada")
             elif tipo_imagen == 'gris':
                 self.crear_histograma_gris(no_imagen, histograma)
-            elif tipo_imagen == 'binaria':
+            elif tipo_imagen == 'binaria' or tipo_imagen == 'componentes':
                 ubicacion, noGrid = self.determinar_ubicacion_grid_img(no_imagen, modalidad="modificada")
                 for i in range(3):
                     widgets = ubicacion.grid_slaves(row=noGrid+i, column=0)

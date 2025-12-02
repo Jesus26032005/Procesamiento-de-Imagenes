@@ -852,33 +852,56 @@ class ProcesadorImagen:
         
         return ProcesadorImagen.convertir_imagen_tk(imagen.imagen_modified)
 
+
     @staticmethod
-    def aplicar_etiquetado_y_contornos(imagen: ImagenData):
-        """
-        Aplica etiquetado de componentes conexos y dibuja contornos.
-        Compara vecindad-4 vs vecindad-8.
-        """
-        imagenBinaria = imagen.imagen_modified[:, :, 0]
+    def etiquetar_y_medir_moho(imagen: ImagenData):
+        matriz_objetos = []
+        mascara = imagen.imagen_modified[:, :, 0]
+        imagen_visual = imagen.imagen_cv.copy() 
 
-        # Etiquetado de componentes conexos
-        num_labels_4, labels_4 = cv2.connectedComponents(imagenBinaria, connectivity=4)
-        num_labels_8, labels_8 = cv2.connectedComponents(imagenBinaria, connectivity=8)
+        contornos, _ = cv2.findContours(mascara, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        area_total = 0
+        perimetro_total = 0
 
-        # Restamos 1 porque el fondo cuenta como etiqueta 0
-        num_objetos_4 = num_labels_4 - 1
-        num_objetos_8 = num_labels_8 - 1
-        diferencia = abs(num_objetos_4 - num_objetos_8)
+        objetos_detectados = 0
+        for i, contorno in enumerate(contornos, start=1):
+            vector_datos = []
+            vector_datos.append(i)
+            
+            area = cv2.contourArea(contorno)
+            vector_datos.append(area)
 
-        # Detección y dibujo de contornos
-        image_color = cv2.cvtColor(imagenBinaria, cv2.COLOR_GRAY2RGB)
-        contours, _ = cv2.findContours(imagenBinaria, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+            perimetro = cv2.arcLength(contorno, True)
+            vector_datos.append(perimetro)
+            objetos_detectados += 1
+            area_total += area
+            perimetro_total += perimetro
 
-        for i, contour in enumerate(contours):
-            cv2.drawContours(image_color, [contour], -1, (0, 255, 0), 2)
-                
-            # Etiquetar cada contorno con un número
-            x, y, w, h = cv2.boundingRect(contour)
-            label_y     = y - 10 if y > 20 else y + h + 20
-            cv2.putText(image_color, f'{i + 1}', (x, label_y), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2)
+            matriz_objetos.append(vector_datos)
+            
+            x, y, w, h = cv2.boundingRect(contorno)
+            M = cv2.moments(contorno)
+            cX, cY = 0, 0
+            if M["m00"] != 0:
+                cX = int(M["m10"] / M["m00"])
+                cY = int(M["m01"] / M["m00"])
+
+            cv2.drawContours(imagen_visual, [contorno], -1, (0, 255, 0), 2)
+
+            texto_id = f"#{i}"
+            cv2.putText(imagen_visual, texto_id, (cX - 10, cY), cv2.FONT_HERSHEY_SIMPLEX, 
+                        0.6, (255, 0, 0), 2)
+
+
+
+        cv2.rectangle(imagen_visual, (0, 0), (300, 150), (0, 0, 0), -1)
+        cv2.putText(imagen_visual, f"Total Manchas: {objetos_detectados}", (10, 25), 
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 255), 2)
+        cv2.putText(imagen_visual, f"Area Total: {area_total:.2f}", (10, 75), 
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 0), 2)
+        cv2.putText(imagen_visual, f"Perimetro Total: {perimetro_total:.2f}", (10, 125), 
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 0, 255), 2)
+        imagen.imagen_modified = imagen_visual
+        imagen.tipo = 'componentes'
         
-        return (num_objetos_4, num_objetos_8, diferencia, labels_4, labels_8, image_color)
+        return ProcesadorImagen.convertir_imagen_tk(imagen.imagen_modified), matriz_objetos

@@ -249,6 +249,11 @@ class ImageController:
         if not self.model.checar_existencia_imagen(numero_imagen):
             self.view.mostrar_mensaje("No se tiene cargada una imagen.", "info")
             return
+
+        if self.model.determinar_tipo_imagen(numero_imagen) == 'componentes':
+            self.view.mostrar_mensaje("La imagen se encuentra etiqueta por tanto no es posible realizar ninguna operacion, reinicie la imagen para continuar", "info")
+            return
+            
         imagen_convertida = self.model.convertir_escala_grises(numero_imagen)
         self.view.actualizar_imagen(imagen_convertida[0], imagen_convertida[1], numero_imagen, "gris")
     
@@ -263,6 +268,11 @@ class ImageController:
         if not self.model.checar_existencia_imagen(numero_imagen):
             self.view.mostrar_mensaje("No se tiene cargada una imagen.", "info")
             return
+
+        if self.model.determinar_tipo_imagen(numero_imagen) == 'componentes':
+            self.view.mostrar_mensaje("La imagen se encuentra etiqueta por tanto no es posible realizar ninguna operacion, reinicie la imagen para continuar", "info")
+            return
+        
         valorUmbral = None
         imagen = self.model._determinarImagen(numero_imagen)
         if imagen.tipo != 'gris':
@@ -285,6 +295,11 @@ class ImageController:
         if not self.model.checar_existencia_imagen(numero_imagen):
             self.view.mostrar_mensaje("No se tiene cargada una imagen.", "info")
             return
+
+        if self.model.determinar_tipo_imagen(numero_imagen) == 'componentes':
+            self.view.mostrar_mensaje("La imagen se encuentra etiqueta por tanto no es posible realizar ninguna operacion, reinicie la imagen para continuar", "info")
+            return
+        
         imagen = self.model._determinarImagen(numero_imagen)
         if imagen.tipo != 'gris':
             self.view.mostrar_mensaje("La imagen debe estar en escala de grises.", "error")
@@ -303,6 +318,10 @@ class ImageController:
         """
         if not self.model.checar_existencia_imagen(numero_imagen):
             self.view.mostrar_mensaje("No se tiene cargada una imagen.", "info")
+            return
+
+        if self.model.determinar_tipo_imagen(numero_imagen) == 'componentes':
+            self.view.mostrar_mensaje("La imagen se encuentra etiqueta por tanto no es posible realizar ninguna operacion, reinicie la imagen para continuar", "info")
             return
         
         if numero_imagen == 1:
@@ -343,6 +362,10 @@ class ImageController:
         if not self.model.checar_existencia_imagen(numero_imagen_1) or not self.model.checar_existencia_imagen(numero_imagen_2):
             self.view.mostrar_mensaje("No se tiene cargada una imagen, se requieren dos imágenes", "info")
             return
+
+        if self.model.determinar_tipo_imagen(numero_imagen_1) == 'componentes' or self.model.determinar_tipo_imagen(numero_imagen_2) == 'componentes':
+            self.view.mostrar_mensaje("La imagen se encuentra etiqueta por tanto no es posible realizar ninguna operacion, reinicie la imagen para continuar", "info")
+            return
         
         imagen_operada = self.model.realizar_operacion_aritmetica_entre_imagenes(numero_imagen_1, numero_imagen_2, operacion)
         self.view.actualizar_imagen(imagen_operada[0], imagen_operada[1], numero_imagen_1, imagen_operada[2])
@@ -364,6 +387,10 @@ class ImageController:
         if not self.model.checar_existencia_imagen(numero_imagen_1) or not self.model.checar_existencia_imagen(numero_imagen_2):
             self.view.mostrar_mensaje("No se tiene cargada una imagen, se requieren dos imágenes", "info")
             return
+
+        if self.model.determinar_tipo_imagen(numero_imagen_1) == 'componentes' or self.model.determinar_tipo_imagen(numero_imagen_2) == 'componentes':
+            self.view.mostrar_mensaje("La imagen se encuentra etiqueta por tanto no es posible realizar ninguna operacion, reinicie la imagen para continuar", "info")
+            return
         
         imagen_operada = self.model.realizar_operacion_logica_entre_imagenes(numero_imagen_1, numero_imagen_2, operacion)
         self.view.actualizar_imagen(imagen_operada[0], imagen_operada[1], numero_imagen_1, imagen_operada[2])
@@ -378,7 +405,11 @@ class ImageController:
         if not self.model.checar_existencia_imagen(numero_imagen):
             self.view.mostrar_mensaje("No se tiene cargada la imagen", "info")
             return
-        
+
+        if self.model.determinar_tipo_imagen(numero_imagen) == 'componentes':
+            self.view.mostrar_mensaje("La imagen se encuentra etiqueta por tanto no es posible realizar ninguna operacion, reinicie la imagen para continuar", "info")
+            return
+
         imagen_operada = self.model.operacion_not(numero_imagen)
         self.view.actualizar_imagen(imagen_operada[0], imagen_operada[1], numero_imagen, imagen_operada[2])
 
@@ -392,6 +423,10 @@ class ImageController:
         """
         if not self.model.checar_existencia_imagen(numero_imagen):
             self.view.mostrar_mensaje("No se tiene cargada la imagen", "info")
+            return
+
+        if self.model.determinar_tipo_imagen(numero_imagen) == 'componentes':
+            self.view.mostrar_mensaje("La imagen se encuentra etiqueta por tanto no es posible realizar ninguna operacion, reinicie la imagen para continuar", "info")
             return
 
         imagen_operada = self.model.agregar_ruido(tipo_ruido, numero_imagen)
@@ -419,6 +454,10 @@ class ImageController:
 
         if not filtro:
             self.view.mostrar_mensaje("No se selecciono un filtro", "info")
+            return
+
+        if self.model.determinar_tipo_imagen(numero_imagen) == 'componentes':
+            self.view.mostrar_mensaje("La imagen se encuentra etiqueta por tanto no es posible realizar ninguna operacion, reinicie la imagen para continuar", "info")
             return
 
         # Advertencia para filtros lentos
@@ -457,6 +496,10 @@ class ImageController:
             self.view.mostrar_mensaje("No se tiene cargada la imagen", "info")
             return
 
+        if self.model.determinar_tipo_imagen(numero_imagen) == 'componentes':
+            self.view.mostrar_mensaje("La imagen se encuentra etiqueta por tanto no es posible realizar ninguna operacion, reinicie la imagen para continuar", "info")
+            return
+
         if self.model.determinar_tipo_imagen(numero_imagen) != 'gris' and tipo_segmentacion != "Método de segmentación por resta canales":
             self.view.mostrar_mensaje("El segmento seleccionado requiere que la imagen sea en escala de grises", "info")
             return
@@ -486,6 +529,10 @@ class ImageController:
             self.view.mostrar_mensaje("No se tiene cargada la imagen", "info")
             return
 
+        if self.model.determinar_tipo_imagen(numero_imagen) == 'componentes':
+            self.view.mostrar_mensaje("La imagen se encuentra etiqueta por tanto no es posible realizar ninguna operacion, reinicie la imagen para continuar", "info")
+            return
+
         if self.model.determinar_tipo_imagen(numero_imagen) != 'gris':
             self.view.mostrar_mensaje("El ajuste de brillo requiere que la imagen sea en escala de grises", "info")
             return
@@ -512,9 +559,15 @@ class ImageController:
             self.view.mostrar_mensaje("No se tiene cargada la imagen", "info")
             return
 
+        if self.model.determinar_tipo_imagen(numero_imagen) == 'componentes':
+            self.view.mostrar_mensaje("La imagen se encuentra etiqueta por tanto no es posible realizar ninguna operacion, reinicie la imagen para continuar", "info")
+            return
+
+
         if self.model.determinar_tipo_imagen(numero_imagen) != 'binaria':
             self.view.mostrar_mensaje("El etiquetado y contornos requiere que la imagen sea binaria", "info")
             return
 
         imagen_etiquetada = self.model.aplicar_etiquetado_y_contornos(numero_imagen)
-        self.tabulator_operations.mostrar_resultados_etiquetado_y_contornos(numero_imagen,imagen_etiquetada[0], imagen_etiquetada[1], imagen_etiquetada[2], imagen_etiquetada[3], imagen_etiquetada[4], imagen_etiquetada[5])
+        self.view.actualizar_imagen(imagen_etiquetada[0], imagen_etiquetada[1], numero_imagen, imagen_etiquetada[2])
+        self.view.tabulator_operations.mostrar_datos_objetos(imagen_etiquetada[3])

@@ -365,7 +365,9 @@ class ImageModel:
             numero_imagen (int): Identificador de la imagen.
             
         Returns:
-            tuple: Resultados del etiquetado y contornos.
+            tuple: Imagen resultante, histograma y tipo de imagen.
         """
         imagen = self._determinarImagen(numero_imagen)
-        return ProcesadorImagen.aplicar_etiquetado_y_contornos(imagen)
+        resultado_operacion, matriz_objetos = ProcesadorImagen.etiquetar_y_medir_moho(imagen)
+        histograma = None
+        return (resultado_operacion, histograma, imagen.tipo, matriz_objetos)

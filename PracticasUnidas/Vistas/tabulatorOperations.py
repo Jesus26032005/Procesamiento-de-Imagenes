@@ -3,6 +3,7 @@ from matplotlib.figure import Figure
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.ticker import MultipleLocator
 import cv2
+from ttkbootstrap.scrolled import ScrolledFrame
 
 class TabulatorOperations(ttk.Frame):
     """
@@ -216,3 +217,21 @@ class TabulatorOperations(ttk.Frame):
         mostrar_figure(marco_visualizaciones, fig1, "Visualización Vecindad-4", 0, 0)
         mostrar_figure(marco_visualizaciones, fig2, "Visualización Vecindad-8", 0, 1)
         mostrar_figure(marco_visualizaciones, fig3, "Contornos y Numeración", 0, 2)
+
+    def mostrar_datos_objetos(self, matriz_objetos):
+        ventana_resultados = ttk.Toplevel(self)
+        ventana_resultados.title("Datos de los Objetos")
+        ventana_resultados.geometry("400x300")
+
+        marco_texto = ScrolledFrame(ventana_resultados)
+        marco_texto.pack(fill='both', expand=True, padx=10, pady=5)
+
+        ttk.Label(marco_texto, text="Resultados de Conteo y Comparación", font=("Arial", 18, "bold")).pack(anchor='w')
+
+        for i in range(len(matriz_objetos)):
+            ttk.Label(marco_texto, text=f"Objeto {matriz_objetos[i][0]}").pack(anchor='w')
+            ttk.Label(marco_texto, text=f"Área: {matriz_objetos[i][1]} pixeles").pack(anchor='w')
+            ttk.Label(marco_texto, text=f"Perímetro: {matriz_objetos[i][2]} pixeles").pack(anchor='w')
+            ttk.Label(marco_texto, text="----------------").pack(anchor='w')
+
+        
