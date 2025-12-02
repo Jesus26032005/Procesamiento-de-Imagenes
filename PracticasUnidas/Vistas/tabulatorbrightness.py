@@ -7,6 +7,12 @@ class TabulatorBrightness(ttk.Frame):
     Permite al usuario aplicar diferentes tipos de ajuste de brillo a las imágenes cargadas.
     """
     def __init__(self, parent):
+        """
+        Inicializa la pestaña de brillo.
+        
+        Args:
+            parent: Widget padre.
+        """
         super().__init__(parent)
 
         for i in range(1,3): self.rowconfigure(i, weight=1)
@@ -32,6 +38,7 @@ class TabulatorBrightness(ttk.Frame):
         self.subtitutulo_controles_ajuste_brillo_img1 = ttk.Label(self.marco_controles_ajuste_brillo_img1, text="Métodos de ajuste de brillo para la imagen principal", font=("Arial", 16, "bold"), wraplength= 400)
         self.subtitutulo_controles_ajuste_brillo_img1.grid(row=0, column=0, columnspan=2, sticky="nsew", padx=5, pady=5)
         
+        # Botones de ajuste de brillo
         self.boton_ecualizacion_uniforme_img1 = ttk.Button(self.marco_controles_ajuste_brillo_img1, text="Ecualización uniforme", bootstyle= estiloControlesAjusteBrillo)
         self.boton_ecualizacion_exponencial_img1 = ttk.Button(self.marco_controles_ajuste_brillo_img1, text="Ecualización exponencial", bootstyle= estiloControlesAjusteBrillo)
         self.boton_ecualizacion_Rayleigh_img1 = ttk.Button(self.marco_controles_ajuste_brillo_img1, text="Ecualización Rayleigh", bootstyle= estiloControlesAjusteBrillo)
@@ -40,6 +47,7 @@ class TabulatorBrightness(ttk.Frame):
         self.boton_funcion_exponencial_img1 = ttk.Button(self.marco_controles_ajuste_brillo_img1, text="Función exponencial", bootstyle= estiloControlesAjusteBrillo)
         self.boton_correccion_gamma_img1 = ttk.Button(self.marco_controles_ajuste_brillo_img1, text="Corrección gamma", bootstyle= estiloControlesAjusteBrillo)
 
+        # Layout
         self.boton_ecualizacion_uniforme_img1.grid(row=1, column=0, sticky="nsew", padx=5, pady=5)
         self.boton_ecualizacion_exponencial_img1.grid(row=1, column=1, sticky="nsew", padx=5, pady=5)
         self.boton_ecualizacion_Rayleigh_img1.grid(row=2, column=0, sticky="nsew", padx=5, pady=5)
@@ -62,6 +70,7 @@ class TabulatorBrightness(ttk.Frame):
         self.subtitutulo_controles_ajuste_brillo_img2 = ttk.Label(self.marco_controles_ajuste_brillo_img2, text="Métodos de ajuste de brillo para la imagen secundaria", font=("Arial", 16, "bold"), wraplength= 400)
         self.subtitutulo_controles_ajuste_brillo_img2.grid(row=0, column=0, columnspan=2, sticky="nsew", padx=5, pady=5)
         
+        # Botones de ajuste de brillo
         self.boton_ecualizacion_uniforme_img2 = ttk.Button(self.marco_controles_ajuste_brillo_img2, text="Ecualización uniforme", bootstyle= estiloControlesAjusteBrillo)
         self.boton_ecualizacion_exponencial_img2 = ttk.Button(self.marco_controles_ajuste_brillo_img2, text="Ecualización exponencial", bootstyle= estiloControlesAjusteBrillo)
         self.boton_ecualizacion_Rayleigh_img2 = ttk.Button(self.marco_controles_ajuste_brillo_img2, text="Ecualización Rayleigh", bootstyle= estiloControlesAjusteBrillo)
@@ -70,6 +79,7 @@ class TabulatorBrightness(ttk.Frame):
         self.boton_funcion_exponencial_img2 = ttk.Button(self.marco_controles_ajuste_brillo_img2, text="Función exponencial", bootstyle= estiloControlesAjusteBrillo)
         self.boton_correccion_gamma_img2 = ttk.Button(self.marco_controles_ajuste_brillo_img2, text="Corrección gamma", bootstyle= estiloControlesAjusteBrillo)
 
+        # Layout
         self.boton_ecualizacion_uniforme_img2.grid(row=1, column=0, sticky="nsew", padx=5, pady=5)
         self.boton_ecualizacion_exponencial_img2.grid(row=1, column=1, sticky="nsew", padx=5, pady=5)
         self.boton_ecualizacion_Rayleigh_img2.grid(row=2, column=0, sticky="nsew", padx=5, pady=5)
@@ -79,6 +89,15 @@ class TabulatorBrightness(ttk.Frame):
         self.boton_correccion_gamma_img2.grid(row=4, column=0, sticky="nsew", padx=5, pady=5, columnspan=2)
 
     def pedir_valor_operacion(self, tipo_ajuste):
+        """
+        Solicita al usuario un valor numérico necesario para ciertos ajustes de brillo.
+        
+        Args:
+            tipo_ajuste (str): Nombre del ajuste seleccionado.
+            
+        Returns:
+            float: Valor ingresado por el usuario.
+        """
         texto = ""
         minimo = 0
         maximo = 0

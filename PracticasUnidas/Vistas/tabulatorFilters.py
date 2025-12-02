@@ -7,6 +7,12 @@ class TabulatorFilters(ttk.Frame):
     Permite al usuario aplicar diferentes tipos de ruido y filtros a las imágenes cargadas.
     """
     def __init__(self, parent):
+        """
+        Inicializa la pestaña de filtros.
+        
+        Args:
+            parent: Widget padre.
+        """
         super().__init__(parent)
 
         for i in range(1,3): self.rowconfigure(i, weight=1)
@@ -30,22 +36,31 @@ class TabulatorFilters(ttk.Frame):
         for i in range(8): self.marco_controles_ruido_filtros_img1.rowconfigure(i, weight=1)
         self.marco_controles_ruido_filtros_img1.columnconfigure(0, weight=1)
 
+        # Subtítulos
         self.subtitulo_controles_ruido_filtro_Img1 = ttk.Label(self.marco_controles_ruido_filtros_img1, text="Operaciones de ruido y filtros para la imagen principal", font=("Arial", 16, "bold"), wraplength= 400)
+        
+        # Sección de Ruido
         self.subtitulo_agregar_ruido_Img1 = ttk.Label(self.marco_controles_ruido_filtros_img1, text="Agregar ruido a la imagen principal", font=("Arial", 14, "bold"), wraplength=400)
         self.boton_agregar_ruido_sal_y_pimienta_Img1 = ttk.Button(self.marco_controles_ruido_filtros_img1, text="Ruido Sal y Pimienta", bootstyle=estiloControlesRuidoFiltro)
         self.boton_agregar_ruido_gaussiano_Img1 = ttk.Button(self.marco_controles_ruido_filtros_img1, text="Ruido Gaussiano", bootstyle=estiloControlesRuidoFiltro)
+        
+        # Sección de Filtros
         self.subtitulo_aplicar_filtros_Img1 = ttk.Label(self.marco_controles_ruido_filtros_img1, text="Aplicar filtros a la imagen principal", font=("Arial", 14, "bold"), wraplength=400)
         
-        # MODIFICACION: Se agregó "Frecuencia" a la lista de values
+        # Combobox para categorías de filtros
         self.lista_tipo_filtros_Img1 = ttk.Combobox(self.marco_controles_ruido_filtros_img1, values=["Lineales", "No lineales", "Avanzados", "Pasa-altas"], state="readonly")
+        # Combobox para filtros específicos (se llena dinámicamente)
         self.lista_opciones_filtros_Img1 = ttk.Combobox(self.marco_controles_ruido_filtros_img1, values=[])
         self.lista_tipo_filtros_Img1.bind("<<ComboboxSelected>>", self._actualizar_opciones_filtro_img1)
 
+        # Valores iniciales
         self.lista_tipo_filtros_Img1.current(0)
         self.lista_opciones_filtros_Img1['values'] = ["Filtro Promediador", "Filtro Promediador Pesado", "Filtro Gaussiano"]
         self.lista_opciones_filtros_Img1['state'] = "readonly"
 
         self.boton_aplicar_filtro_Img1 = ttk.Button(self.marco_controles_ruido_filtros_img1, text="Aplicar Filtro", bootstyle=estiloControlesRuidoFiltro)
+        
+        # Layout
         self.subtitulo_controles_ruido_filtro_Img1.grid(row=0, column=0, columnspan=2, sticky="nsew", padx=5, pady=5)
         self.subtitulo_agregar_ruido_Img1.grid(row=1, column=0, columnspan=2, sticky="nsew", padx=5, pady=5)
         self.boton_agregar_ruido_sal_y_pimienta_Img1.grid(row=2, column=0, sticky="nsew", padx=5, pady=5)
@@ -93,7 +108,6 @@ class TabulatorFilters(ttk.Frame):
         self.boton_agregar_ruido_gaussiano_Img2 = ttk.Button(self.marco_controles_ruido_filtros_img2, text="Ruido Gaussiano", bootstyle="primary")
         self.subtitulo_aplicar_filtros_Img2 = ttk.Label(self.marco_controles_ruido_filtros_img2, text="Aplicar filtros a la imagen secundaria", font=("Arial", 14, "bold"), wraplength=400)
         
-        # MODIFICACION: Se agregó "Frecuencia" a la lista de values
         self.lista_tipo_filtros_Img2 = ttk.Combobox(self.marco_controles_ruido_filtros_img2, values=["Lineales", "No lineales", "Avanzados", "Pasa-altas"], state="readonly")
         self.lista_opciones_filtros_Img2 = ttk.Combobox(self.marco_controles_ruido_filtros_img2, values=[])
         self.lista_tipo_filtros_Img2.bind("<<ComboboxSelected>>", self._actualizar_opciones_filtros_Img2)
@@ -136,6 +150,7 @@ class TabulatorFilters(ttk.Frame):
     def pedir_valor_canny(self):
         """
         Solicita al usuario los valores de umbral mínimo y máximo para el filtro Canny.
+        
         Returns:
             tuple: (valor_umbral_minimo, valor_umbral_maximo) ingresados por el usuario.
         """

@@ -8,10 +8,12 @@ Gestiona el estado de las imágenes y delega el procesamiento a la clase Procesa
 class ImageModel:
     """
     Clase Modelo que almacena las imágenes cargadas y gestiona las operaciones sobre ellas.
+    Actúa como intermediario entre el Controlador y la utilidad de procesamiento de imágenes.
     """
     def __init__(self):
         """
         Inicializa el modelo con dos espacios para imágenes (imagen1 e imagen2).
+        Inicialmente están vacíos (None).
         """
         self.imagen1 = None
         self.imagen2 = None
@@ -46,15 +48,22 @@ class ImageModel:
         Returns:
             tuple or str: Tupla con la imagen TK y su histograma si es exitoso, o mensaje de error.
         """
+        # Validación: Para cargar la imagen 2, la imagen 1 debe existir (regla de negocio opcional)
         if numero_imagen == 2 and self.imagen1 is None:
             return "La imagen 1 no está cargada."
+            
         resultadoCreacion = ProcesadorImagen.cargar_imagen(ruta)
+        
+        # Si hubo un error al cargar (retorna string), se propaga el error
         if isinstance(resultadoCreacion, str):
             return resultadoCreacion
+            
         if numero_imagen == 1:
             self.imagen1 = resultadoCreacion
         elif numero_imagen == 2:
             self.imagen2 = resultadoCreacion
+            
+        # Retorna la representación visual (TK) y el histograma inicial
         return (ProcesadorImagen.convertir_imagen_tk(resultadoCreacion.imagen_modified), 
         ProcesadorImagen.calcular_histograma_color(resultadoCreacion.imagen_modified))
 
@@ -108,9 +117,20 @@ class ImageModel:
         histograma = None
         imagen = self._determinarImagen(numero_imagen)
 
+        # Calcula el histograma antes o después de la conversión según la lógica deseada
+        # Aquí parece que se calcula sobre la imagen modificada (que será gris)
+        # Nota: La implementación original calculaba histograma gris ANTES de convertir? 
+        # Revisando lógica original: 
+        # histograma = ProcesadorImagen.calcular_histograma_gris(imagen.imagen_modified)
+        # return (ProcesadorImagen.convertir_escala_grises(imagen), histograma)
+        # Esto parece asumir que ya es gris o se calcula sobre lo que será. 
+        # Corrección lógica: Primero convertimos, luego calculamos histograma o al revés si la función 'convertir' modifica in-place.
+        # ProcesadorImagen.convertir_escala_grises modifica in-place el objeto imagen.
+        
+        imagen_tk = ProcesadorImagen.convertir_escala_grises(imagen)
         histograma = ProcesadorImagen.calcular_histograma_gris(imagen.imagen_modified)
 
-        return (ProcesadorImagen.convertir_escala_grises(imagen), histograma)
+        return (imagen_tk, histograma)
 
     def binarizar_imagen(self, numero_imagen, metodo: str, umbral: int = None):
         """
@@ -122,7 +142,7 @@ class ImageModel:
             umbral (int, optional): Valor umbral para el método fijo.
             
         Returns:
-            list: Lista con la imagen TK binarizada y None (histograma no aplica igual).
+            list: Lista con la imagen TK binarizada y None (histograma no aplica igual para visualización estándar).
         """
         histograma = None
         imagen = self._determinarImagen(numero_imagen)
@@ -137,7 +157,7 @@ class ImageModel:
         
         Args:
             numero_imagen (int): Identificador de la imagen.
-            operacion (str): Tipo de operación.
+            operacion (str): Tipo de operación ('suma', 'resta', 'multiplicacion').
             valor (int): Valor escalar.
             
         Returns:
@@ -153,6 +173,7 @@ class ImageModel:
         if operacion == 'multiplicacion':
             resultado_operacion = ProcesadorImagen.multiplicar_escalar(imagen, valor)
         
+        # Recalcular histograma según el tipo resultante
         if imagen.tipo == 'rgb':
             histograma = ProcesadorImagen.calcular_histograma_color(imagen.imagen_modified)
         elif imagen.tipo == 'gris':
@@ -231,7 +252,7 @@ class ImageModel:
         Agrega ruido a la imagen.
         
         Args:
-            tipo_ruido (str): Tipo de ruido.
+            tipo_ruido (str): Tipo de ruido ('sal y pimienta', 'gaussiano').
             numero_imagen (int): Identificador de la imagen.
             
         Returns:
@@ -296,8 +317,8 @@ class ImageModel:
         Args:
             tipo_segmentacion (str): Nombre del filtro.
             numero_imagen (int): Identificador de la imagen.
-            valor_umbral_1 (int, optional): Umbral mínimo (para Canny) o Radio (D0) para filtros de frecuencia.
-            valor_umbral_maximo (int, optional): Umbral máximo (para Canny).
+            valor_umbral_1 (int, optional): Primer umbral.
+            valor_umbral_2 (int, optional): Segundo umbral.
             
         Returns:
             tuple: Imagen resultante, histograma y tipo de imagen.
@@ -310,6 +331,7 @@ class ImageModel:
             return (resultado_operacion, histograma, imagen.tipo)
 
         resultado_operacion = ProcesadorImagen.aplicar_segmentacion(tipo_segmentacion, imagen, valor_umbral_1, valor_umbral_2)
+        
         if tipo_segmentacion == "Método de dos umbrales":
             histograma = ProcesadorImagen.calcular_histograma_gris(imagen.imagen_modified)
         else:
@@ -336,5 +358,14 @@ class ImageModel:
         return (resultado_operacion, histograma, imagen.tipo)
     
     def aplicar_etiquetado_y_contornos(self, numero_imagen):
+        """
+        Aplica etiquetado de componentes conexos y detección de contornos.
+        
+        Args:
+            numero_imagen (int): Identificador de la imagen.
+            
+        Returns:
+            tuple: Resultados del etiquetado y contornos.
+        """
         imagen = self._determinarImagen(numero_imagen)
         return ProcesadorImagen.aplicar_etiquetado_y_contornos(imagen)

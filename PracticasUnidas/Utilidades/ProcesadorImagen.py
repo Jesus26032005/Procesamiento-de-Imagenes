@@ -6,6 +6,7 @@ from PIL import ImageTk
 from scipy import ndimage
 from scipy.signal import find_peaks
 
+# Diccionario de mensajes de error comunes al cargar imágenes
 MENSAJES_ERROR = {
     FileNotFoundError: "No se encontró la imagen en la ruta especificada.",
     OSError: "Error al abrir la imagen, archivo dañado o formato no soportado.",
@@ -14,11 +15,26 @@ MENSAJES_ERROR = {
 }
 
 class ProcesadorImagen:
+    """
+    Clase utilitaria que contiene métodos estáticos para el procesamiento de imágenes.
+    Incluye carga, guardado, conversión, filtros, operaciones aritméticas/lógicas, segmentación y ajustes de brillo.
+    """
+    
     @staticmethod
     def cargar_imagen(ruta: str):
+        """
+        Carga una imagen desde la ruta especificada.
+        
+        Args:
+            ruta (str): Ruta del archivo de imagen.
+            
+        Returns:
+            ImagenData or str: Objeto ImagenData si es exitoso, o mensaje de error.
+        """
         try:
             imagen_pillow = Image.open(ruta)
             imagen_cv = np.array(imagen_pillow)
+            # Redimensionar para ajustar a la interfaz (opcional, hardcoded a 1400x600)
             imagen_cv= cv2.resize(imagen_cv, (1400, 600))
             imagen_copia_modified = imagen_cv.copy()
             return ImagenData(imagen_cv, imagen_copia_modified, imagen_cv.shape[0], imagen_cv.shape[1], 'rgb')
@@ -29,6 +45,15 @@ class ProcesadorImagen:
 
     @staticmethod
     def reiniciar_imagen(imagen: ImagenData):
+        """
+        Restaura la imagen modificada a su estado original.
+        
+        Args:
+            imagen (ImagenData): Objeto de datos de la imagen.
+            
+        Returns:
+            tuple: Imagen TK restaurada y su histograma.
+        """
         imagen.imagen_modified = imagen.imagen_cv.copy()
         imagen.tipo = 'rgb'
         return (ProcesadorImagen.convertir_imagen_tk(imagen.imagen_modified), 
@@ -36,9 +61,25 @@ class ProcesadorImagen:
 
     @staticmethod
     def guardar_imagen(imagen: np.ndarray, ruta: str):
+        """
+        Guarda la imagen en disco.
+        
+        Args:
+            imagen (np.ndarray): Matriz de la imagen.
+            ruta (str): Ruta de destino.
+        """
         cv2.imwrite(ruta, imagen)
     
     def convertir_imagen_tk(imagen: np.ndarray):
+        """
+        Convierte una matriz numpy (imagen OpenCV) a un objeto PhotoImage de Tkinter para mostrar en la GUI.
+        
+        Args:
+            imagen (np.ndarray): Matriz de la imagen.
+            
+        Returns:
+            ImageTk.PhotoImage: Objeto de imagen para Tkinter.
+        """
         max_dimension = (1400, 600)
         imagen_pil = Image.fromarray(imagen)
         imagen_pil.thumbnail(max_dimension, Image.LANCZOS)
@@ -46,13 +87,33 @@ class ProcesadorImagen:
     
     @staticmethod
     def convertir_escala_grises(imagen: ImagenData):
+        """
+        Convierte la imagen a escala de grises.
+        
+        Args:
+            imagen (ImagenData): Objeto de datos de la imagen.
+            
+        Returns:
+            ImageTk.PhotoImage: Imagen TK en escala de grises.
+        """
         imagen_auxiliar_gris = cv2.cvtColor(imagen.imagen_modified, cv2.COLOR_BGR2GRAY)
         imagen.tipo = 'gris'
+        # Mantenemos 3 canales para compatibilidad visual, aunque sean iguales
         imagen.imagen_modified = cv2.merge([imagen_auxiliar_gris, imagen_auxiliar_gris, imagen_auxiliar_gris])
         return ProcesadorImagen.convertir_imagen_tk(imagen.imagen_modified)
     
     @staticmethod
     def binarizar_metodo_fijo(imagen: ImagenData, umbral: int):
+        """
+        Binariza la imagen usando un umbral fijo.
+        
+        Args:
+            imagen (ImagenData): Objeto de datos de la imagen.
+            umbral (int): Valor de corte (0-255).
+            
+        Returns:
+            ImageTk.PhotoImage: Imagen TK binarizada.
+        """
         imagen_auxiliar = imagen.imagen_modified[:, :, 0]
         _, imagen_auxiliar = cv2.threshold(imagen_auxiliar, umbral, 255, cv2.THRESH_BINARY)
         imagen.imagen_modified = cv2.merge([imagen_auxiliar, imagen_auxiliar, imagen_auxiliar])
@@ -61,6 +122,15 @@ class ProcesadorImagen:
     
     @staticmethod
     def binarizar_metodo_otsu(imagen: ImagenData):
+        """
+        Binariza la imagen usando el método de Otsu (umbral automático).
+        
+        Args:
+            imagen (ImagenData): Objeto de datos de la imagen.
+            
+        Returns:
+            ImageTk.PhotoImage: Imagen TK binarizada.
+        """
         imagen_auxiliar = imagen.imagen_modified[:, :, 0]
         _, imagen_auxiliar = cv2.threshold(imagen_auxiliar, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
         imagen.imagen_modified = cv2.merge([imagen_auxiliar, imagen_auxiliar, imagen_auxiliar])
@@ -69,12 +139,30 @@ class ProcesadorImagen:
 
     @staticmethod
     def calcular_histograma_gris(imagen: np.ndarray):
+        """
+        Calcula el histograma para una imagen en escala de grises.
+        
+        Args:
+            imagen (np.ndarray): Matriz de la imagen.
+            
+        Returns:
+            tuple: Arrays de valores y frecuencias.
+        """
         datos_aplanados = imagen[:, :, 0].flatten()
         valor, frecuencia = np.unique(datos_aplanados, return_counts=True)
         return valor, frecuencia
     
     @staticmethod
     def calcular_histograma_color(imagen: np.ndarray):
+        """
+        Calcula el histograma para cada canal de una imagen a color.
+        
+        Args:
+            imagen (np.ndarray): Matriz de la imagen.
+            
+        Returns:
+            list: Lista de [valores, frecuencias] por canal.
+        """
         canales = cv2.split(imagen)
         histogramaValores = list()
         for i in canales:
@@ -83,6 +171,17 @@ class ProcesadorImagen:
         return histogramaValores
 
     def determinarTipo(tipo_imagen_1: str, tipo_imagen_2: str):
+        """
+        Determina el tipo resultante de una operación entre dos imágenes.
+        Prioriza RGB sobre Gris y Gris sobre Binaria.
+        
+        Args:
+            tipo_imagen_1 (str): Tipo de la primera imagen.
+            tipo_imagen_2 (str): Tipo de la segunda imagen.
+            
+        Returns:
+            str: Tipo resultante ('rgb', 'gris', 'binaria').
+        """
         if tipo_imagen_1 == 'rgb' or tipo_imagen_2 == 'rgb':
             return 'rgb'
         if tipo_imagen_1 == 'gris' and tipo_imagen_2 == 'gris':
@@ -91,35 +190,40 @@ class ProcesadorImagen:
             return 'binaria'
         if (tipo_imagen_1 == 'gris' and tipo_imagen_2 == 'binaria') or (tipo_imagen_1 == 'binaria' and tipo_imagen_2 == 'gris'):
             return 'gris'
+        # Caso redundante pero explícito para combinaciones con RGB
         if (tipo_imagen_1 == 'rgb' and tipo_imagen_2 == 'binaria') or (tipo_imagen_1 == 'binaria' and tipo_imagen_2 == 'rgb') or (tipo_imagen_1 == 'rgb' and tipo_imagen_2 == 'gris') or (tipo_imagen_1 == 'gris' and tipo_imagen_2 == 'rgb'):
             return 'rgb'
 
     @staticmethod
     def sumar_escalar(imagen: ImagenData, valor: int):
+        """Suma un valor escalar a cada pixel de la imagen."""
         cv2.add(imagen.imagen_modified, valor, imagen.imagen_modified)
         if imagen.tipo == 'binaria':
             imagen.tipo = 'gris'
-
         return ProcesadorImagen.convertir_imagen_tk(imagen.imagen_modified)
     
     @staticmethod
     def restar_escalar(imagen: ImagenData, valor: int):
+        """Resta un valor escalar a cada pixel de la imagen."""
         cv2.subtract(imagen.imagen_modified, valor, imagen.imagen_modified)
         if imagen.tipo == 'binaria':
             imagen.tipo = 'gris'
-
         return ProcesadorImagen.convertir_imagen_tk(imagen.imagen_modified)
     
     @staticmethod
     def multiplicar_escalar(imagen: ImagenData, valor: int):
+        """Multiplica cada pixel de la imagen por un valor escalar."""
         cv2.multiply(imagen.imagen_modified, valor, imagen.imagen_modified)
         if imagen.tipo == 'binaria':
             imagen.tipo = 'gris'
-            
         return ProcesadorImagen.convertir_imagen_tk(imagen.imagen_modified)
     
     @staticmethod
     def operaciones_aritmeticas_entre_imagenes(imagen_1: ImagenData, imagen_2: ImagenData, operacion: str):
+        """
+        Realiza operaciones aritméticas (suma, resta, mult) entre dos imágenes.
+        Ajusta el tipo de la imagen resultante.
+        """
         imagen_1.tipo = ProcesadorImagen.determinarTipo(imagen_1.tipo, imagen_2.tipo)
         if operacion == 'suma':
             ProcesadorImagen.sumar_imagenes(imagen_1, imagen_2)
@@ -141,6 +245,9 @@ class ProcesadorImagen:
 
     @staticmethod
     def operaciones_logicas_entre_imagenes(imagen_1: ImagenData, imagen_2: ImagenData, operacion: str):
+        """
+        Realiza operaciones lógicas (OR, AND, XOR) entre dos imágenes.
+        """
         imagen_1.tipo = ProcesadorImagen.determinarTipo(imagen_1.tipo, imagen_2.tipo)
         if operacion == 'or':
             ProcesadorImagen.or_logico(imagen_1, imagen_2)
@@ -164,17 +271,23 @@ class ProcesadorImagen:
 
     @staticmethod
     def not_logico(imagen_1: ImagenData):
+        """Invierte los bits de la imagen (negativo)."""
         cv2.bitwise_not(imagen_1.imagen_modified, imagen_1.imagen_modified)
         return ProcesadorImagen.convertir_imagen_tk(imagen_1.imagen_modified)
     
     @staticmethod
     def agregar_ruido_sal_pimienta(imagen: ImagenData):
+        """
+        Agrega ruido de tipo 'Sal y Pimienta' a la imagen.
+        """
         cantidad= 0.05
         copiaAux = imagen.imagen_modified.copy()
         numeroPixeles= int(cantidad * imagen.ancho * imagen.alto)
 
+        # Sal (blanco)
         coordenadas = [np.random.randint(0, i - 1, numeroPixeles) for i in copiaAux.shape[:2]]
         copiaAux[coordenadas[0], coordenadas[1]] = 255 
+        # Pimienta (negro)
         coordenadas = [np.random.randint(0, i - 1, numeroPixeles) for i in copiaAux.shape[:2]]
         copiaAux[coordenadas[0], coordenadas[1]] = 0
         imagen.imagen_modified = copiaAux
@@ -182,6 +295,9 @@ class ProcesadorImagen:
     
     @staticmethod
     def agregar_ruido_gaussiano(imagen: ImagenData):
+        """
+        Agrega ruido Gaussiano a la imagen.
+        """
         imagen_ruido = None
         if imagen.tipo == 'binaria':
             imagen.tipo = 'gris'
@@ -208,6 +324,9 @@ class ProcesadorImagen:
     
     @staticmethod
     def aplicar_filtro(filtro, imagen: ImagenData, valor_umbral_minimo = None, valor_umbral_maximo = None):
+        """
+        Aplica un filtro espacial o de frecuencia seleccionado.
+        """
         if filtro == 'Filtro Promediador':
             ProcesadorImagen.aplicar_filtro_promediador(imagen)
         elif filtro == 'Filtro Promediador Pesado':
@@ -248,10 +367,12 @@ class ProcesadorImagen:
         return ProcesadorImagen.convertir_imagen_tk(imagen.imagen_modified)
 
     def aplicar_filtro_promediador(imagen: ImagenData, kernel_size=3):
+        """Filtro de suavizado promediador (media aritmética)."""
         kernel = np.ones((kernel_size, kernel_size), np.float32) / (kernel_size * kernel_size)
         imagen.imagen_modified = cv2.filter2D(imagen.imagen_modified, -1, kernel)
     
     def aplicar_filtro_promediador_pesado(imagen: ImagenData, kernel_size=3):
+        """Filtro de suavizado promediador ponderado (más peso al centro)."""
         kernel = np.ones((kernel_size, kernel_size), np.float32)
         center = kernel_size // 2
         kernel[center, center] = kernel_size * 2
@@ -259,15 +380,19 @@ class ProcesadorImagen:
         imagen.imagen_modified = cv2.filter2D(imagen.imagen_modified, -1, kernel)
     
     def aplicar_filtro_gaussiano(imagen: ImagenData, kernel_size=3, sigma=1.0):
+        """Filtro Gaussiano para suavizado."""
         imagen.imagen_modified = cv2.GaussianBlur(imagen.imagen_modified, (kernel_size, kernel_size), sigma)
     
     def aplicar_filtro_bilateral(imagen: ImagenData, diameter=9, sigma_color=75, sigma_space=75):
+        """Filtro Bilateral (suaviza preservando bordes)."""
         imagen.imagen_modified = cv2.bilateralFilter(imagen.imagen_modified, diameter, sigma_color, sigma_space)
 
     def aplicar_filtro_mediana(imagen: ImagenData, kernel_size=3):
+        """Filtro de Mediana (efectivo para ruido sal y pimienta)."""
         imagen.imagen_modified = cv2.medianBlur(imagen.imagen_modified, kernel_size)
     
     def aplicar_filtro_moda(imagen: ImagenData, kernel_size=3):
+        """Filtro de Moda (valor más frecuente en la vecindad)."""
         def _modafiltro2D(channel):
             def funcionModa(x):
                 values, counts = np.unique(x, return_counts=True)
@@ -287,12 +412,15 @@ class ProcesadorImagen:
             imagen.imagen_modified = _modafiltro2D(imagen.imagen_modified)
         
     def aplicar_filtro_maximo(imagen: ImagenData, kernel_size=3):
+        """Filtro de Máximo (dilatación)."""
         imagen.imagen_modified = cv2.dilate(imagen.imagen_modified, np.ones((kernel_size, kernel_size)))
     
     def aplicar_filtro_minimo(imagen: ImagenData, kernel_size=3):
+        """Filtro de Mínimo (erosión)."""
         imagen.imagen_modified = cv2.erode(imagen.imagen_modified, np.ones((kernel_size, kernel_size)))
     
     def aplicar_filtro_adaptativo(imagen: ImagenData, max_window_size=7):
+        """Filtro de Mediana Adaptativa (ajusta el tamaño de ventana según el ruido local)."""
         def process_pixel(i, j):
             window_size = 3
             while window_size <= max_window_size:
@@ -362,6 +490,7 @@ class ProcesadorImagen:
             imagen.imagen_modified = result
     
     def aplicar_filtro_contraharmonico(imagen: ImagenData, kernel_size=3, Q=1.5):
+        """Filtro de Media Contraharmónica (útil para ruido sal o pimienta dependiendo de Q)."""
         def contraharmonic_mean(channel):
             kernel = np.ones((kernel_size, kernel_size))
             padding = kernel_size // 2
@@ -392,6 +521,7 @@ class ProcesadorImagen:
             imagen.imagen_modified = contraharmonic_mean(imagen.imagen_modified)
 
     def aplicar_filtro_mediana_ponderada(imagen: ImagenData, kernel_size=3, weights=None):
+        """Filtro de Mediana Ponderada."""
         if weights is None:
             center = kernel_size // 2
             y, x = np.ogrid[-center:kernel_size-center, -center:kernel_size-center]
@@ -428,6 +558,7 @@ class ProcesadorImagen:
             imagen.imagen_modified = weighted_median(imagen.imagen_modified)
     
     def aplicar_filtro_sobel(imagen: ImagenData, kernel_size=3):
+        """Filtro de Sobel para detección de bordes."""
         imagen_gris= imagen.imagen_modified[:, :, 0]
         sobel_x = cv2.Sobel(imagen_gris, cv2.CV_64F, 1, 0, ksize=kernel_size)
         sobel_y = cv2.Sobel(imagen_gris, cv2.CV_64F, 0, 1, ksize=kernel_size)
@@ -438,6 +569,7 @@ class ProcesadorImagen:
         return ProcesadorImagen.convertir_imagen_tk(imagen.imagen_modified)
 
     def aplicar_filtro_Prewitt(imagen: ImagenData):
+        """Filtro de Prewitt para detección de bordes."""
         imagen_gris = imagen.imagen_modified[:, :, 0]
         kernel_prewitt_x = np.array([[1, 0, -1], [1, 0, -1], [1, 0, -1]], dtype=np.float32)
         kernel_prewitt_y = np.array([[1, 1, 1], [0, 0, 0], [-1, -1, -1]], dtype=np.float32)
@@ -453,6 +585,7 @@ class ProcesadorImagen:
         return ProcesadorImagen.convertir_imagen_tk(imagen.imagen_modified)
 
     def aplicar_filtro_roberts(imagen: ImagenData):
+        """Filtro de Roberts para detección de bordes."""
         imagen_gris = imagen.imagen_modified[:, :, 0]
         kernel_robert_x = np.array([[1, 0], [0, -1]], dtype=np.float32)
         kernel_robert_y = np.array([[0, 1], [-1, 0]], dtype=np.float32)
@@ -468,6 +601,7 @@ class ProcesadorImagen:
         return ProcesadorImagen.convertir_imagen_tk(imagen.imagen_modified)
     
     def aplicar_filtro_canny(imagen: ImagenData, valor_umbral_minimo, valor_umbral_maximo):
+        """Filtro de Canny para detección de bordes óptima."""
         imagen_gris = imagen.imagen_modified[:, :, 0]
         bordes_canny = cv2.Canny(imagen_gris, valor_umbral_minimo, valor_umbral_maximo)
         imagen.imagen_modified = cv2.merge((bordes_canny, bordes_canny, bordes_canny))
@@ -477,7 +611,7 @@ class ProcesadorImagen:
     @staticmethod
     def aplicar_filtro_laplaciano(imagen: ImagenData):
         """
-        Aplica filtro Laplaciano en el dominio espacial.
+        Aplica filtro Laplaciano en el dominio espacial (segunda derivada).
         """
         imagen_gris = imagen.imagen_modified[:, :, 0]
         laplaciano = cv2.Laplacian(imagen_gris, cv2.CV_64F)
@@ -490,7 +624,7 @@ class ProcesadorImagen:
     @staticmethod
     def aplicar_filtro_laplaciano_8(imagen: ImagenData):
         """
-        Aplica filtro Laplaciano de 8 vecinos
+        Aplica filtro Laplaciano considerando 8 vecinos (diagonales incluidas).
         """
         imagen_gris = imagen.imagen_modified[:, :, 0]
         
@@ -509,7 +643,7 @@ class ProcesadorImagen:
     @staticmethod
     def aplicar_filtro_kirsch(imagen: ImagenData):
         """
-        Aplica filtro Kirsch en el dominio espacial.
+        Aplica filtro Kirsch (detección de bordes direccional).
         """
         imagen_gris = imagen.imagen_modified[:, :, 0]
         kirsch_kernels = [
@@ -535,6 +669,9 @@ class ProcesadorImagen:
     
     @staticmethod
     def aplicar_segmentacion(metodo_segmentacion,imagen: ImagenData, umbral1, umbral2):
+        """
+        Aplica algoritmos de segmentación.
+        """
         if metodo_segmentacion == "otsu":
             #Solo en este caso se aplica un return debido a que este metodo regresa la imagen binarizada
             return ProcesadorImagen.binarizar_metodo_otsu(imagen)
@@ -552,6 +689,7 @@ class ProcesadorImagen:
         return ProcesadorImagen.convertir_imagen_tk(imagen.imagen_modified)
     
     def aplicar_segmentacion_entropia_kapur(imagen: ImagenData):
+        """Segmentación basada en la entropía de Kapur."""
         imagen_gris = imagen.imagen_modified[:, :, 0]
         histograma, _ = np.histogram(imagen_gris, bins=256, range=(0, 256))
         total_pixeles = imagen_gris.size
@@ -579,15 +717,23 @@ class ProcesadorImagen:
         imagen.tipo = "binaria"
 
     def aplicar_segmentacion_minimo_histograma(imagen: ImagenData):
+        """Segmentación buscando el mínimo entre dos picos del histograma."""
         imagen_gris = imagen.imagen_modified[:, :, 0]
         histograma, _ = np.histogram(imagen_gris, bins=256, range=(0, 256))
         picos, _ = find_peaks(histograma, distance=20)
-        minimo = np.argmin(histograma[picos[0]:picos[1]]) + picos[0]
+        # Si no encuentra suficientes picos, podría fallar o necesitar fallback.
+        # Asumimos que encuentra al menos 2 para el rango.
+        if len(picos) >= 2:
+            minimo = np.argmin(histograma[picos[0]:picos[1]]) + picos[0]
+        else:
+            minimo = 127 # Fallback simple
+            
         imagen_minimo = (imagen_gris > minimo).astype(np.uint8) * 255
         imagen.imagen_modified = cv2.merge((imagen_minimo, imagen_minimo, imagen_minimo))
         imagen.tipo = "binaria"
     
     def aplicar_segmentacion_media(imagen: ImagenData):
+        """Segmentación usando la media de intensidad como umbral."""
         imagen_gris = imagen.imagen_modified[:, :, 0]
         umbral = np.mean(imagen_gris)
         imagen_media = (imagen_gris > umbral).astype(np.uint8) * 255
@@ -595,6 +741,7 @@ class ProcesadorImagen:
         imagen.tipo = "binaria"
 
     def aplicar_segmentacion_dos_umbrales(imagen: ImagenData, umbral1, umbral2):
+        """Segmentación con dos umbrales (multinivel)."""
         imagen_gris = imagen.imagen_modified[:, :, 0]
         imagen_multi_umbrales = np.zeros_like(imagen_gris)
         imagen_multi_umbrales[imagen_gris < umbral1] = 0
@@ -604,6 +751,7 @@ class ProcesadorImagen:
         imagen.tipo = "gris"
 
     def aplicar_segmentacion_umbral_banda(imagen: ImagenData, umbral1, umbral2):
+        """Segmentación por banda (mantiene solo lo que está entre umbrales)."""
         imagen_gris = imagen.imagen_modified[:, :, 0]
         imagen_umbral_banda = np.zeros_like(imagen_gris)
         imagen_umbral_banda[(imagen_gris >= umbral1) & (imagen_gris <= umbral2)] = 255
@@ -612,6 +760,9 @@ class ProcesadorImagen:
 
     @staticmethod
     def aplicar_ajuste_brillo(metodo_ajuste_brillo,imagen: ImagenData, valor):
+        """
+        Aplica técnicas de ajuste de brillo y contraste.
+        """
         if metodo_ajuste_brillo == "Ecualización uniforme":
             ProcesadorImagen.ecualizacion_uniforme(imagen)
         if metodo_ajuste_brillo == "Ecualización exponencial":
@@ -630,36 +781,43 @@ class ProcesadorImagen:
         return ProcesadorImagen.convertir_imagen_tk(imagen.imagen_modified)
 
     def ecualizacion_uniforme(imagen: ImagenData):
+        """Ecualización de histograma estándar."""
         imagen_gris = imagen.imagen_modified[:, :, 0]
         imagen_ecualizada = cv2.equalizeHist(imagen_gris)
         imagen.imagen_modified = cv2.merge((imagen_ecualizada, imagen_ecualizada, imagen_ecualizada))
 
     def ecualizacion_exponencial(imagen: ImagenData):
+        """Ecualización con distribución exponencial."""
         imagen_gris = imagen.imagen_modified[:, :, 0]
         imagen_exponenciada = np.uint8(255 * (1 - np.exp(-imagen_gris / 255)))
         imagen.imagen_modified = cv2.merge((imagen_exponenciada, imagen_exponenciada, imagen_exponenciada))
 
     def ecualizacion_rayleigh(imagen: ImagenData):
+        """Ecualización con distribución Rayleigh."""
         imagen_gris = imagen.imagen_modified[:, :, 0]
         imagen_rayleigh = np.uint8(255 * np.sqrt(imagen_gris / 255))
         imagen.imagen_modified = cv2.merge((imagen_rayleigh, imagen_rayleigh, imagen_rayleigh))
 
     def ecualizacion_hipercubica(imagen: ImagenData, potencia=4):
+        """Ajuste de brillo hipercúbico."""
         imagen_gris = imagen.imagen_modified[:, :, 0]
         imagen_hipercubica = np.uint8(255 * (imagen_gris / 255) ** potencia)
         imagen.imagen_modified = cv2.merge((imagen_hipercubica, imagen_hipercubica, imagen_hipercubica))
 
     def ecualizacion_logaritmica_hiperbolica(imagen: ImagenData):
+        """Ajuste logarítmico hiperbólico."""
         imagen_gris = imagen.imagen_modified[:, :, 0]
         imagen_logaritmica = np.uint8(255 * np.log1p(imagen_gris) / np.log1p(255))
         imagen.imagen_modified = cv2.merge((imagen_logaritmica, imagen_logaritmica, imagen_logaritmica))
 
     def funcion_exponencial(imagen: ImagenData, potencia=2):
+        """Ajuste de brillo exponencial."""
         imagen_gris = imagen.imagen_modified[:, :, 0]
         imagen_exponencial = np.uint8(255 * (imagen_gris / 255) ** potencia)
         imagen.imagen_modified = cv2.merge((imagen_exponencial, imagen_exponencial, imagen_exponencial))
 
     def correccion_gamma(imagen: ImagenData, gamma=1.5):
+        """Corrección Gamma."""
         imagen_gris = imagen.imagen_modified[:, :, 0]
         imagen_gamma = np.power(imagen_gris / 255.0, gamma) * 255
         imagen_gamma = np.uint8(imagen_gamma)
@@ -667,6 +825,10 @@ class ProcesadorImagen:
 
     @staticmethod
     def aislar_moho_resta_canales(imagen: ImagenData):
+        """
+        Segmentación específica para aislar moho en pan mediante resta de canales.
+        Lógica: El moho suele ser azul/verdoso y el pan rojizo/tostado.
+        """
         # 1. Separar la imagen en sus 3 canales base (Blue, Green, Red)
         # OpenCV carga las imágenes en orden BGR
         canal_rojo, canal_verde, canal_azul = cv2.split(imagen.imagen_modified)
@@ -677,7 +839,7 @@ class ProcesadorImagen:
         diferencia = cv2.subtract(canal_azul, canal_rojo)
         
         # 3. (Opcional) Amplificar el resultado para que se vea más blanco
-        # Multiplicamos por 2 o 3 para aumentar el contraste del moho detectado
+        # Multiplicamos por 4 para aumentar el contraste del moho detectado
         diferencia = cv2.multiply(diferencia, 4)
         
         # 4. Binarizar para limpiar el "ruido" tenue
@@ -692,24 +854,31 @@ class ProcesadorImagen:
 
     @staticmethod
     def aplicar_etiquetado_y_contornos(imagen: ImagenData):
+        """
+        Aplica etiquetado de componentes conexos y dibuja contornos.
+        Compara vecindad-4 vs vecindad-8.
+        """
         imagenBinaria = imagen.imagen_modified[:, :, 0]
 
+        # Etiquetado de componentes conexos
         num_labels_4, labels_4 = cv2.connectedComponents(imagenBinaria, connectivity=4)
         num_labels_8, labels_8 = cv2.connectedComponents(imagenBinaria, connectivity=8)
 
+        # Restamos 1 porque el fondo cuenta como etiqueta 0
         num_objetos_4 = num_labels_4 - 1
         num_objetos_8 = num_labels_8 - 1
         diferencia = abs(num_objetos_4 - num_objetos_8)
 
+        # Detección y dibujo de contornos
         image_color = cv2.cvtColor(imagenBinaria, cv2.COLOR_GRAY2RGB)
         contours, _ = cv2.findContours(imagenBinaria, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
         for i, contour in enumerate(contours):
             cv2.drawContours(image_color, [contour], -1, (0, 255, 0), 2)
                 
+            # Etiquetar cada contorno con un número
             x, y, w, h = cv2.boundingRect(contour)
             label_y     = y - 10 if y > 20 else y + h + 20
             cv2.putText(image_color, f'{i + 1}', (x, label_y), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2)
         
         return (num_objetos_4, num_objetos_8, diferencia, labels_4, labels_8, image_color)
-        
