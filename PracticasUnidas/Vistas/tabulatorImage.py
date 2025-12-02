@@ -88,7 +88,7 @@ class TabulatorImage(ttk.Frame):
             return None
 
     def pedir_ruta_archivo_guardar(self):
-        ruta_archivo = filedialog.asksaveasfilename(title="Guardar imagen", filetypes=[("Image files", "*.jpg *.jpeg *.png"), ("All files")])
+        ruta_archivo = filedialog.asksaveasfilename(title="Guardar imagen", filetypes=[("Image files", "*.jpg *.JPEJ *.png"), ("All files")])
         if ruta_archivo:
             return ruta_archivo
         else: 

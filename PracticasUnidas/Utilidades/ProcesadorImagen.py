@@ -665,3 +665,51 @@ class ProcesadorImagen:
         imagen_gamma = np.uint8(imagen_gamma)
         imagen.imagen_modified = cv2.merge((imagen_gamma, imagen_gamma, imagen_gamma))
 
+    @staticmethod
+    def aislar_moho_resta_canales(imagen: ImagenData):
+        # 1. Separar la imagen en sus 3 canales base (Blue, Green, Red)
+        # OpenCV carga las imágenes en orden BGR
+        canal_rojo, canal_verde, canal_azul = cv2.split(imagen.imagen_modified)
+        
+        # 2. Aplicar la aritmética: Azul - Rojo
+        # El pan tiene mucho Rojo, así que: (poco azul) - (mucho rojo) = 0 (Negro)
+        # El moho tiene mucho Azul, así que: (mucho azul) - (poco rojo) = Positivo (Gris)
+        diferencia = cv2.subtract(canal_azul, canal_rojo)
+        
+        # 3. (Opcional) Amplificar el resultado para que se vea más blanco
+        # Multiplicamos por 2 o 3 para aumentar el contraste del moho detectado
+        diferencia = cv2.multiply(diferencia, 4)
+        
+        # 4. Binarizar para limpiar el "ruido" tenue
+        # Cualquier cosa con un valor leve (grietas oscuras) se va a negro
+        _, resultado_binario = cv2.threshold(diferencia, 20, 255, cv2.THRESH_BINARY)
+        
+        # 5. Reconstruir para mostrar en Tkinter
+        imagen.imagen_modified = cv2.merge([resultado_binario, resultado_binario, resultado_binario])
+        imagen.tipo = 'binaria'
+        
+        return ProcesadorImagen.convertir_imagen_tk(imagen.imagen_modified)
+
+    @staticmethod
+    def aplicar_etiquetado_y_contornos(imagen: ImagenData):
+        imagenBinaria = imagen.imagen_modified[:, :, 0]
+
+        num_labels_4, labels_4 = cv2.connectedComponents(imagenBinaria, connectivity=4)
+        num_labels_8, labels_8 = cv2.connectedComponents(imagenBinaria, connectivity=8)
+
+        num_objetos_4 = num_labels_4 - 1
+        num_objetos_8 = num_labels_8 - 1
+        diferencia = abs(num_objetos_4 - num_objetos_8)
+
+        image_color = cv2.cvtColor(imagenBinaria, cv2.COLOR_GRAY2RGB)
+        contours, _ = cv2.findContours(imagenBinaria, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+
+        for i, contour in enumerate(contours):
+            cv2.drawContours(image_color, [contour], -1, (0, 255, 0), 2)
+                
+            x, y, w, h = cv2.boundingRect(contour)
+            label_y     = y - 10 if y > 20 else y + h + 20
+            cv2.putText(image_color, f'{i + 1}', (x, label_y), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2)
+        
+        return (num_objetos_4, num_objetos_8, diferencia, labels_4, labels_8, image_color)
+        

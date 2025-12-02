@@ -77,6 +77,9 @@ class ImageController:
         self.tabulator_operations.boton_not_logico_img2.config(command= lambda: self.operacion_not(2))
         self.tabulator_operations.boton_xor_logico_img2.config(command= lambda: self.operacion_logica_entre_imagenes("xor", 2, 1))
 
+        self.tabulator_operations.boton_extra_img1.config(command = lambda: self.aplicar_etiquetado_y_contornos(1))
+        self.tabulator_operations.boton_extra_img2.config(command= lambda: self.aplicar_etiquetado_y_contornos(2))
+
     def conectar_eventos_filtros(self):
         """
         Conecta los eventos de los botones de la pestaña de filtros y ruido.
@@ -106,6 +109,8 @@ class ImageController:
         self.tabulator_segmentation.boton_segmentacion_dos_umbrales_img2.config(command= lambda: self.aplicar_segmentacion("Método de dos umbrales",2))
         self.tabulator_segmentation.boton_segmentacion_umbral_banda_img1.config(command= lambda: self.aplicar_segmentacion("Método de umbral de banda",1))
         self.tabulator_segmentation.boton_segmentacion_umbral_banda_img2.config(command= lambda: self.aplicar_segmentacion("Método de umbral de banda",2))
+        self.tabulator_segmentation.boton_segmentacion_moho_hsv_img1.config(command= lambda: self.aplicar_segmentacion("Método de segmentación por resta canales",1))
+        self.tabulator_segmentation.boton_segmentacion_moho_hsv_img2.config(command= lambda: self.aplicar_segmentacion("Método de segmentación por resta canales",2))
 
     def conectar_eventos_ajuste_brillo(self):
         self.tabulator_brightness = self.view.tabulator_brightness
@@ -371,7 +376,7 @@ class ImageController:
             self.view.mostrar_mensaje("No se tiene cargada la imagen", "info")
             return
 
-        if self.model.determinar_tipo_imagen(numero_imagen) != 'gris':
+        if self.model.determinar_tipo_imagen(numero_imagen) != 'gris' and tipo_segmentacion != "Método de segmentación por resta canales":
             self.view.mostrar_mensaje("El segmento seleccionado requiere que la imagen sea en escala de grises", "info")
             return
 
@@ -380,7 +385,8 @@ class ImageController:
                 valor_umbral_1, valor_umbral_2 = self.view.tabulator_segmentation.pedir_valor_umbrales("umbral de banda")
             else:
                 valor_umbral_1, valor_umbral_2 = self.view.tabulator_segmentation.pedir_valor_umbrales("dos umbrales")
-            if not valor_umbral_1 or not valor_umbral_2:
+            
+            if valor_umbral_1==None or valor_umbral_2==None:
                 self.view.mostrar_mensaje("No se ingresaron valores validos", "info")
                 return
 
@@ -405,3 +411,15 @@ class ImageController:
 
         imagen_ajustada = self.model.aplicar_ajuste_brillo(tipo_ajuste, numero_imagen, valor_operacion)
         self.view.actualizar_imagen(imagen_ajustada[0], imagen_ajustada[1], numero_imagen, imagen_ajustada[2])
+
+    def aplicar_etiquetado_y_contornos(self, numero_imagen):
+        if not self.model.checar_existencia_imagen(numero_imagen):
+            self.view.mostrar_mensaje("No se tiene cargada la imagen", "info")
+            return
+
+        if self.model.determinar_tipo_imagen(numero_imagen) != 'binaria':
+            self.view.mostrar_mensaje("El etiquetado y contornos requiere que la imagen sea binaria", "info")
+            return
+
+        imagen_etiquetada = self.model.aplicar_etiquetado_y_contornos(numero_imagen)
+        self.tabulator_operations.mostrar_resultados_etiquetado_y_contornos(numero_imagen,imagen_etiquetada[0], imagen_etiquetada[1], imagen_etiquetada[2], imagen_etiquetada[3], imagen_etiquetada[4], imagen_etiquetada[5])

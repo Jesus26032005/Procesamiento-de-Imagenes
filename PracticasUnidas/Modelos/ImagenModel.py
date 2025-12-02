@@ -305,6 +305,10 @@ class ImageModel:
         histograma = None
         imagen = self._determinarImagen(numero_imagen)
 
+        if tipo_segmentacion == "Método de segmentación por resta canales":
+            resultado_operacion = ProcesadorImagen.aislar_moho_resta_canales(imagen)
+            return (resultado_operacion, histograma, imagen.tipo)
+
         resultado_operacion = ProcesadorImagen.aplicar_segmentacion(tipo_segmentacion, imagen, valor_umbral_1, valor_umbral_2)
         if tipo_segmentacion == "Método de dos umbrales":
             histograma = ProcesadorImagen.calcular_histograma_gris(imagen.imagen_modified)
@@ -330,4 +334,7 @@ class ImageModel:
         resultado_operacion = ProcesadorImagen.aplicar_ajuste_brillo(tipo_ajuste, imagen, valor_operacion)
         histograma = ProcesadorImagen.calcular_histograma_gris(imagen.imagen_modified)
         return (resultado_operacion, histograma, imagen.tipo)
-        
+    
+    def aplicar_etiquetado_y_contornos(self, numero_imagen):
+        imagen = self._determinarImagen(numero_imagen)
+        return ProcesadorImagen.aplicar_etiquetado_y_contornos(imagen)

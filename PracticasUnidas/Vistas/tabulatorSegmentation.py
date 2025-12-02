@@ -38,13 +38,16 @@ class TabulatorSegmentation(ttk.Frame):
         self.boton_segmentacion_media_img1 = ttk.Button(self.marco_controles_segmentacion_img1, text="Método de la media", bootstyle= estiloControlesSegmentacion)
         self.boton_segmentacion_dos_umbrales_img1 = ttk.Button(self.marco_controles_segmentacion_img1, text="Método de dos umbrales", bootstyle= estiloControlesSegmentacion)
         self.boton_segmentacion_umbral_banda_img1 = ttk.Button(self.marco_controles_segmentacion_img1, text="Método de umbral de banda", bootstyle= estiloControlesSegmentacion)
+        self.boton_segmentacion_moho_hsv_img1 = ttk.Button(self.marco_controles_segmentacion_img1, text="Método de segmentación de moho", bootstyle= estiloControlesSegmentacion)
 
+    
         self.boton_segmentacion_otsu_img1.grid(row=1, column=0, sticky="nsew", padx=5, pady=5)
         self.boton_segmentacion_entropia_kapur_img1.grid(row=1, column=1, sticky="nsew", padx=5, pady=5)
         self.boton_minimo_histograma_img1.grid(row=2, column=0, sticky="nsew", padx=5, pady=5)
         self.boton_segmentacion_media_img1.grid(row=2, column=1, sticky="nsew", padx=5, pady=5)
         self.boton_segmentacion_dos_umbrales_img1.grid(row=3, column=0, sticky="nsew", padx=5, pady=5)
-        self.boton_segmentacion_umbral_banda_img1.grid(row=3, column=1, sticky="nsew", padx=5, pady=5, columnspan=2)
+        self.boton_segmentacion_umbral_banda_img1.grid(row=3, column=1, sticky="nsew", padx=5, pady=5)
+        self.boton_segmentacion_moho_hsv_img1.grid(row=4, column=0, sticky="nsew", padx=5, pady=5, columnspan=2)
 
     def _crear_componentes_segmentacion_img2(self):
         """
@@ -66,13 +69,15 @@ class TabulatorSegmentation(ttk.Frame):
         self.boton_segmentacion_media_img2 = ttk.Button(self.marco_controles_segmentacion_img2, text="Método de la media", bootstyle= estiloControlesSegmentacion)
         self.boton_segmentacion_dos_umbrales_img2 = ttk.Button(self.marco_controles_segmentacion_img2, text="Método de dos umbrales", bootstyle= estiloControlesSegmentacion)
         self.boton_segmentacion_umbral_banda_img2 = ttk.Button(self.marco_controles_segmentacion_img2, text="Método de umbral de banda", bootstyle= estiloControlesSegmentacion)
+        self.boton_segmentacion_moho_hsv_img2 = ttk.Button(self.marco_controles_segmentacion_img2, text="Método de segmentación de moho", bootstyle= estiloControlesSegmentacion)
 
         self.boton_segmentacion_otsu_img2.grid(row=1, column=0, sticky="nsew", padx=5, pady=5)
         self.boton_segmentacion_entropia_kapur_img2.grid(row=1, column=1, sticky="nsew", padx=5, pady=5)
         self.boton_minimo_histograma_img2.grid(row=2, column=0, sticky="nsew", padx=5, pady=5)
         self.boton_segmentacion_media_img2.grid(row=2, column=1, sticky="nsew", padx=5, pady=5)
         self.boton_segmentacion_dos_umbrales_img2.grid(row=3, column=0, sticky="nsew", padx=5, pady=5)
-        self.boton_segmentacion_umbral_banda_img2.grid(row=3, column=1, sticky="nsew", padx=5, pady=5, columnspan=2)
+        self.boton_segmentacion_umbral_banda_img2.grid(row=3, column=1, sticky="nsew", padx=5, pady=5)
+        self.boton_segmentacion_moho_hsv_img2.grid(row=4, column=0, sticky="nsew", padx=5, pady=5, columnspan=2)
 
     def pedir_valor_umbrales(self, tipo_segmentacion):
         if tipo_segmentacion == "dos umbrales":
@@ -95,6 +100,7 @@ class TabulatorSegmentation(ttk.Frame):
         valor_umbral_2 = simpledialog.askinteger("Valor de extremo de la banda", texto_2, 
         minvalue=valor_umbral_1, maxvalue=255,
         parent=self)
+
 
         if valor_umbral_2 is None:
             return None, None

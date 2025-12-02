@@ -1,4 +1,8 @@
 import ttkbootstrap as ttk
+from matplotlib.figure import Figure
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+from matplotlib.ticker import MultipleLocator
+import cv2
 
 class TabulatorOperations(ttk.Frame):
     def __init__(self, parent):
@@ -40,7 +44,7 @@ class TabulatorOperations(ttk.Frame):
         self.boton_not_logico_img1 = ttk.Button(self.marcoControlesImagen1, text="NOT", bootstyle=estiloControlesImg)
         self.boton_xor_logico_img1 = ttk.Button(self.marcoControlesImagen1, text="XOR", bootstyle=estiloControlesImg)
 
-        self.boton_extra_img1 = ttk.Button(self.marcoControlesImagen1, text="Extraccion conexas0", bootstyle=estiloControlesImg)
+        self.boton_extra_img1 = ttk.Button(self.marcoControlesImagen1, text="Extraccion conexas", bootstyle=estiloControlesImg)
 
         self.subtitulo_controles_img1.grid(row=0, column=0, columnspan=3, sticky="nsew", padx=5, pady=5)
         self.subtitulo_operaciones_aritmeticas_img1.grid(row=1, column=0, columnspan=3, sticky="nsew", padx=5, pady=5)
@@ -104,3 +108,55 @@ class TabulatorOperations(ttk.Frame):
         self.boton_not_logico_img2.grid(row=7, column=2, sticky="nsew", padx=5, pady=5)
         self.boton_xor_logico_img2.grid(row=8, column=0, columnspan=3, sticky="nsew", padx=5, pady=5)
         self.boton_extra_img2.grid(row=9, column=0, columnspan=3, sticky="nsew", padx=5, pady=5)
+
+    def mostrar_resultados_etiquetado_y_contornos(self, imagenNo, num_objetos_4, num_objetos_8, diferencia, labels_4, labels_8, image_color):
+        ventana_resultados = ttk.Toplevel(self)
+        ventana_resultados.title(f"Resultados de Análisis de Objetos - Imagen {'Principal' if imagenNo == 1 else 'Adicional'}")
+        ventana_resultados.geometry("1000x800")
+            
+        marco_texto = ttk.Frame(ventana_resultados, padding=10)
+        marco_texto.pack(fill='x', padx=10, pady=5)
+
+        ttk.Label(marco_texto, text="Resultados de Conteo y Comparación", font=("Arial", 18, "bold")).pack(anchor='w')
+        ttk.Label(marco_texto, text=f"Número de objetos detectados con vecindad-4: {num_objetos_4}", font=("Arial", 16)).pack(anchor='w')
+        ttk.Label(marco_texto, text=f"Número de objetos detectados con vecindad-8: {num_objetos_8}", font=("Arial", 16)).pack(anchor='w')
+        ttk.Label(marco_texto, text=f"Diferencia entre vecindad-4 y vecindad-8: {diferencia}", font=("Arial", 16)).pack(anchor='w')
+
+
+        marco_visualizaciones = ttk.Frame(ventana_resultados, padding=10)
+        marco_visualizaciones.pack(fill='both', expand=True, padx=10, pady=10)
+        marco_visualizaciones.columnconfigure(0, weight=1)
+        marco_visualizaciones.columnconfigure(1, weight=1)
+        marco_visualizaciones.columnconfigure(2, weight=1)
+
+        def mostrar_figure(marcoPadre, figura, titulo, fila, columna):
+            sub_marco = ttk.Labelframe(marcoPadre, text=titulo, padding=5)
+            sub_marco.grid(row=fila, column=columna, sticky="nsew", padx=5, pady=5)
+
+            canvas = FigureCanvasTkAgg(figura, master=sub_marco)
+            canvas.draw()
+            canvas.get_tk_widget().pack(fill='both', expand=True)
+
+        fig1 = Figure(figsize=(4, 4), dpi=100)
+        ax1 = fig1.add_subplot(1, 1, 1)
+        ax1.imshow(labels_4, cmap='jet')
+        ax1.set_title('Etiquetado con Vecindad-4')
+        ax1.axis('off')
+        fig1.colorbar(ax1.get_images()[0], ax=ax1, shrink=0.8)
+
+        fig2 = Figure(figsize=(4, 4), dpi=100)
+        ax2 = fig2.add_subplot(1, 1, 1)
+        ax2.imshow(labels_8, cmap='jet')
+        ax2.set_title('Etiquetado con Vecindad-8')
+        ax2.axis('off')
+        fig2.colorbar(ax2.get_images()[0], ax=ax2, shrink=0.8) 
+            
+        fig3 = Figure(figsize=(4, 4), dpi=100)
+        ax3 = fig3.add_subplot(1, 1, 1)
+        ax3.imshow(cv2.cvtColor(image_color, cv2.COLOR_BGR2RGB)) 
+        ax3.set_title('Objetos Detectados y Numerados')
+        ax3.axis('off')
+
+        mostrar_figure(marco_visualizaciones, fig1, "Visualización Vecindad-4", 0, 0)
+        mostrar_figure(marco_visualizaciones, fig2, "Visualización Vecindad-8", 0, 1)
+        mostrar_figure(marco_visualizaciones, fig3, "Contornos y Numeración", 0, 2)
