@@ -29,6 +29,7 @@ class ImageController:
         self.conectar_eventos_filtros()
         self.conectar_eventos_segmentacion()
         self.conectar_eventos_ajuste_brillo()
+        self.conectar_eventos_morfologia()
 
     def conectar_eventos_basicos(self):
         """
@@ -188,6 +189,24 @@ class ImageController:
         # Corrección Gamma
         self.tabulator_brightness.boton_correccion_gamma_img1.config(command= lambda: self.aplicar_ajuste_brillo("Corrección gamma",1))
         self.tabulator_brightness.boton_correccion_gamma_img2.config(command= lambda: self.aplicar_ajuste_brillo("Corrección gamma",2))
+
+    def conectar_eventos_morfologia(self):
+        self.tabulator_morphology = self.view.tabulator_morphology
+        # Erosión
+        self.tabulator_morphology.boton_erosion_img1.config(command= lambda: self.aplicar_morfologia("Erosión",1))
+        self.tabulator_morphology.boton_erosion_img2.config(command= lambda: self.aplicar_morfologia("Erosión",2))
+        
+        # Dilatación
+        self.tabulator_morphology.boton_dilatacion_img1.config(command= lambda: self.aplicar_morfologia("Dilatación",1))
+        self.tabulator_morphology.boton_dilatacion_img2.config(command= lambda: self.aplicar_morfologia("Dilatación",2))
+        
+        # Apertura
+        self.tabulator_morphology.boton_apertura_img1.config(command= lambda: self.aplicar_morfologia("Apertura",1))
+        self.tabulator_morphology.boton_apertura_img2.config(command= lambda: self.aplicar_morfologia("Apertura",2))
+        
+        # Cierre
+        self.tabulator_morphology.boton_cierre_img1.config(command= lambda: self.aplicar_morfologia("Cierre",1))
+        self.tabulator_morphology.boton_cierre_img2.config(command= lambda: self.aplicar_morfologia("Cierre",2))
 
     def cargar_imagen(self, numero_imagen):
         """
@@ -571,3 +590,27 @@ class ImageController:
         imagen_etiquetada = self.model.aplicar_etiquetado_y_contornos(numero_imagen)
         self.view.actualizar_imagen(imagen_etiquetada[0], imagen_etiquetada[1], numero_imagen, imagen_etiquetada[2])
         self.view.tabulator_operations.mostrar_datos_objetos(imagen_etiquetada[3])
+
+    def aplicar_morfologia(self, tipo_morfologia, numero_imagen):
+        """
+        Aplica operaciones morfológicas (erosión, dilatación, apertura, cierre).
+        Requiere que la imagen sea binaria.
+        
+        Args:
+            numero_imagen (int): Identificador de la imagen (1 o 2).
+            tipo_morfologia (str): Tipo de morfología ('erosionar', 'dilatar', 'apertura', 'cierre').
+        """
+        if not self.model.checar_existencia_imagen(numero_imagen):
+            self.view.mostrar_mensaje("No se tiene cargada la imagen", "info")
+            return
+
+        if self.model.determinar_tipo_imagen(numero_imagen) == 'componentes':
+            self.view.mostrar_mensaje("La imagen se encuentra etiqueta por tanto no es posible realizar ninguna operacion, reinicie la imagen para continuar", "info")
+            return
+
+        if self.model.determinar_tipo_imagen(numero_imagen) not in ['binaria', 'gris']:
+            self.view.mostrar_mensaje("La morfologia requiere que la imagen sea binaria o en escala de grises", "info")
+            return
+
+        imagen_morfologica = self.model.aplicar_morfologia(tipo_morfologia, numero_imagen)
+        self.view.actualizar_imagen(imagen_morfologica[0], imagen_morfologica[1], numero_imagen, imagen_morfologica[2])

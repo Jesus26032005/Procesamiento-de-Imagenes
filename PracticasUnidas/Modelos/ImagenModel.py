@@ -371,3 +371,23 @@ class ImageModel:
         resultado_operacion, matriz_objetos = ProcesadorImagen.etiquetar_y_medir_moho(imagen)
         histograma = None
         return (resultado_operacion, histograma, imagen.tipo, matriz_objetos)
+
+    def aplicar_morfologia(self, tipo_morfologia, numero_imagen):
+        """
+        Aplica una operación de morfología a la imagen.
+        
+        Args:
+            tipo_morfologia (str): Nombre de la operación de morfología.
+            numero_imagen (int): Identificador de la imagen.
+            
+        Returns:
+            tuple: Imagen resultante, histograma y tipo de imagen.
+        """
+        imagen = self._determinarImagen(numero_imagen)
+        imagen_modificada = ProcesadorImagen.aplicar_morfologia(tipo_morfologia, imagen)
+        
+        if imagen.tipo == 'gris':
+            histograma = ProcesadorImagen.calcular_histograma_gris(imagen.imagen_modified)
+        else:
+            histograma = None
+        return (imagen_modificada, histograma, imagen.tipo)

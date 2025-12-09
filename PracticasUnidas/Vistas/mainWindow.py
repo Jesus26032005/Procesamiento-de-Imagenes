@@ -5,6 +5,7 @@ from Vistas.tabulatorImage import TabulatorImage
 from Vistas.tabulatorFilters import TabulatorFilters
 from Vistas.tabulatorSegmentation import TabulatorSegmentation
 from Vistas.tabulatorbrightness import TabulatorBrightness
+from Vistas.TabulatorMorphology import TabulatorMorphology
 from tkinter import filedialog, messagebox, simpledialog, DISABLED
 from ttkbootstrap.scrolled import ScrolledFrame
 from matplotlib.figure import Figure
@@ -65,12 +66,14 @@ class MainWindow(ttk.Window):
         self.tabulator_filters = TabulatorFilters(self.panelTabulator)
         self.tabulator_segmentation = TabulatorSegmentation(self.panelTabulator)
         self.tabulator_brightness = TabulatorBrightness(self.panelTabulator)
+        self.tabulator_morphology = TabulatorMorphology(self.panelTabulator)
         
         self.panelTabulator.add(self.tabulator_main, text="Practica Principal")
         self.panelTabulator.add(self.tabulator_operations, text="Operaciones")
         self.panelTabulator.add(self.tabulator_filters, text="Filtros")
         self.panelTabulator.add(self.tabulator_segmentation, text="Segmentación")
         self.panelTabulator.add(self.tabulator_brightness, text="Brillo")
+        self.panelTabulator.add(self.tabulator_morphology, text="Morfológica")
 
     def _configurarPanelImagen(self):
         """

@@ -852,7 +852,6 @@ class ProcesadorImagen:
         
         return ProcesadorImagen.convertir_imagen_tk(imagen.imagen_modified)
 
-
     @staticmethod
     def etiquetar_y_medir_moho(imagen: ImagenData):
         matriz_objetos = []
@@ -869,9 +868,11 @@ class ProcesadorImagen:
             vector_datos.append(i)
             
             area = cv2.contourArea(contorno)
+            area = round(area, 2)
             vector_datos.append(area)
 
             perimetro = cv2.arcLength(contorno, True)
+            perimetro = round(perimetro, 2)
             vector_datos.append(perimetro)
             objetos_detectados += 1
             area_total += area
@@ -905,3 +906,50 @@ class ProcesadorImagen:
         imagen.tipo = 'componentes'
         
         return ProcesadorImagen.convertir_imagen_tk(imagen.imagen_modified), matriz_objetos
+
+    @staticmethod
+    def aplicar_morfologia(tipo_morfologia, imagen: ImagenData):
+        """
+        Aplica una operación de morfología a la imagen.
+        
+        Args:
+            tipo_morfologia (str): Nombre de la operación de morfología.
+            imagen (ImagenData): Imagen a la que se le aplica la operación.
+            
+        Returns:
+            tuple: Imagen resultante, histograma y tipo de imagen.
+        """
+
+        if tipo_morfologia == 'Erosión':
+            ProcesadorImagen.erosionar(imagen)
+        elif tipo_morfologia == 'Dilatación':
+            ProcesadorImagen.dilatar(imagen)
+        elif tipo_morfologia == 'Apertura':
+            ProcesadorImagen.apertura(imagen)
+        elif tipo_morfologia == 'Cierre':
+            ProcesadorImagen.cierre(imagen)
+        return ProcesadorImagen.convertir_imagen_tk(imagen.imagen_modified)
+
+    @staticmethod
+    def erosionar(imagen: ImagenData):
+        kernel = np.ones((5,5), np.uint8)
+        imagen_erosionada = cv2.erode(imagen.imagen_modified[:, :, 0], kernel, iterations = 1) 
+        imagen.imagen_modified = cv2.merge((imagen_erosionada, imagen_erosionada, imagen_erosionada))
+
+    @staticmethod
+    def dilatar(imagen: ImagenData):
+        kernel = np.ones((5,5), np.uint8)
+        imagen_dilatada = cv2.dilate(imagen.imagen_modified[:, :, 0], kernel, iterations = 1)
+        imagen.imagen_modified = cv2.merge((imagen_dilatada, imagen_dilatada, imagen_dilatada))
+
+    @staticmethod
+    def apertura(imagen: ImagenData):
+        kernel = np.ones((5,5), np.uint8)
+        imagen_apertura = cv2.morphologyEx(imagen.imagen_modified[:, :, 0], cv2.MORPH_OPEN, kernel)
+        imagen.imagen_modified = cv2.merge((imagen_apertura, imagen_apertura, imagen_apertura))
+
+    @staticmethod
+    def cierre(imagen: ImagenData):
+        kernel = np.ones((5,5), np.uint8)
+        imagen_cierre = cv2.morphologyEx(imagen.imagen_modified[:, :, 0], cv2.MORPH_CLOSE, kernel)
+        imagen.imagen_modified = cv2.merge((imagen_cierre, imagen_cierre, imagen_cierre))
