@@ -113,7 +113,7 @@ class TabulatorImage(ttk.Frame):
         Returns:
             str: Ruta del archivo seleccionado o None.
         """
-        ruta_archivo = filedialog.askopenfilename(title="Seleccionar imagen", filetypes=[("Image files", "*.jpg *.jpeg *.png"), ("All files")])
+        ruta_archivo = filedialog.askopenfilename(title="Seleccionar imagen", filetypes=[("Image files", "*.jpg *.jpeg *.png *.webp"), ("All files")])
         if ruta_archivo:
             return ruta_archivo
         else: 

@@ -832,13 +832,17 @@ class ProcesadorImagen:
         # 1. Separar la imagen en sus 3 canales base (Blue, Green, Red)
         # OpenCV carga las imágenes en orden BGR
         canal_rojo, canal_verde, canal_azul = cv2.split(imagen.imagen_modified)
+
+        # 2. Obtener el máximo entre Azul y Verde
+        # Esto captura la señal fuerte, ya sea que venga del moho azul o del verde
+        max_azul_verde = cv2.max(canal_azul, canal_verde)
         
-        # 2. Aplicar la aritmética: Azul - Rojo
+        # 3. Aplicar la aritmética: Azul - Rojo
         # El pan tiene mucho Rojo, así que: (poco azul) - (mucho rojo) = 0 (Negro)
         # El moho tiene mucho Azul, así que: (mucho azul) - (poco rojo) = Positivo (Gris)
-        diferencia = cv2.subtract(canal_azul, canal_rojo)
+        diferencia = cv2.subtract(max_azul_verde, canal_rojo)
         
-        # 5. Reconstruir para mostrar en Tkinter
+        # 4. Reconstruir para mostrar en Tkinter
         imagen.imagen_modified = cv2.merge([diferencia, diferencia, diferencia])
         imagen.tipo = 'gris'
         
