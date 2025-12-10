@@ -838,17 +838,9 @@ class ProcesadorImagen:
         # El moho tiene mucho Azul, así que: (mucho azul) - (poco rojo) = Positivo (Gris)
         diferencia = cv2.subtract(canal_azul, canal_rojo)
         
-        # 3. (Opcional) Amplificar el resultado para que se vea más blanco
-        # Multiplicamos por 4 para aumentar el contraste del moho detectado
-        diferencia = cv2.multiply(diferencia, 4)
-        
-        # 4. Binarizar para limpiar el "ruido" tenue
-        # Cualquier cosa con un valor leve (grietas oscuras) se va a negro
-        _, resultado_binario = cv2.threshold(diferencia, 20, 255, cv2.THRESH_BINARY)
-        
         # 5. Reconstruir para mostrar en Tkinter
-        imagen.imagen_modified = cv2.merge([resultado_binario, resultado_binario, resultado_binario])
-        imagen.tipo = 'binaria'
+        imagen.imagen_modified = cv2.merge([diferencia, diferencia, diferencia])
+        imagen.tipo = 'gris'
         
         return ProcesadorImagen.convertir_imagen_tk(imagen.imagen_modified)
 

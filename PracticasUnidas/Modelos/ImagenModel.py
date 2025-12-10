@@ -328,6 +328,7 @@ class ImageModel:
 
         if tipo_segmentacion == "Método de segmentación por resta canales":
             resultado_operacion = ProcesadorImagen.aislar_moho_resta_canales(imagen)
+            histograma = ProcesadorImagen.calcular_histograma_gris(imagen.imagen_modified)
             return (resultado_operacion, histograma, imagen.tipo)
 
         resultado_operacion = ProcesadorImagen.aplicar_segmentacion(tipo_segmentacion, imagen, valor_umbral_1, valor_umbral_2)
