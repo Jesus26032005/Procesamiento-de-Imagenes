@@ -56,7 +56,16 @@ class TabulatorMorphology(ttk.Frame):
         self.boton_dilatacion_img1 = ttk.Button(self.marcoControlesImagen1, text="Dilatación", bootstyle=estiloControlesImg)
         self.boton_apertura_img1 = ttk.Button(self.marcoControlesImagen1, text="Apertura", bootstyle=estiloControlesImg)
         self.boton_cierre_img1 = ttk.Button(self.marcoControlesImagen1, text="Cierre", bootstyle=estiloControlesImg)
-        
+        self.boton_frontera_img1 = ttk.Button(self.marcoControlesImagen1, text="Frontera", bootstyle=estiloControlesImg)
+        self.boton_hit_or_miss_img1 = ttk.Button(self.marcoControlesImagen1, text="Hit or Miss", bootstyle=estiloControlesImg)
+        self.boton_adelgazamiento_img1 = ttk.Button(self.marcoControlesImagen1, text="Adelgazamiento", bootstyle=estiloControlesImg)
+        self.boton_suavizado_morfologico_img1 = ttk.Button(self.marcoControlesImagen1, text="Suavizado morfológico", bootstyle=estiloControlesImg)
+        self.boton_grad_erosion_img1 = ttk.Button(self.marcoControlesImagen1, text="Gradiente por erosión", bootstyle=estiloControlesImg)
+        self.boton_grad_dilatacion_img1 = ttk.Button(self.marcoControlesImagen1, text="Gradiente por dilatación", bootstyle=estiloControlesImg)
+        self.boton_grad_simetrico_img1 = ttk.Button(self.marcoControlesImagen1, text="Gradiente simétrico", bootstyle=estiloControlesImg)
+        self.boton_tophat_img1 = ttk.Button(self.marcoControlesImagen1, text="Top-hat", bootstyle=estiloControlesImg)
+        self.boton_blackhat_img1 = ttk.Button(self.marcoControlesImagen1, text="Black-hat", bootstyle=estiloControlesImg)
+
         # Posicionamiento en el grid
         self.subtitulo_operaciones_img1.grid(row=0, column=0, columnspan=2, sticky="nsew", padx=5, pady=5)
         self.subtitulo_operaciones_morfologicas_img1.grid(row=1, column=0, columnspan=2, sticky="nsew", padx=5, pady=5)
@@ -64,6 +73,16 @@ class TabulatorMorphology(ttk.Frame):
         self.boton_dilatacion_img1.grid(row=2, column=1, sticky="nsew", padx=5, pady=5)
         self.boton_apertura_img1.grid(row=3, column=0, sticky="nsew", padx=5, pady=5)
         self.boton_cierre_img1.grid(row=3, column=1, sticky="nsew", padx=5, pady=5)
+        self.boton_frontera_img1.grid(row=4, column=0, sticky="nsew", padx=5, pady=5)
+        self.boton_hit_or_miss_img1.grid(row=4, column=1, sticky="nsew", padx=5, pady=5)
+        self.boton_adelgazamiento_img1.grid(row=5, column=0, sticky="nsew", padx=5, pady=5)
+        self.boton_suavizado_morfologico_img1.grid(row=5, column=1, sticky="nsew", padx=5, pady=5)
+        self.boton_grad_erosion_img1.grid(row=6, column=0, sticky="nsew", padx=5, pady=5)
+        self.boton_grad_dilatacion_img1.grid(row=6, column=1, sticky="nsew", padx=5, pady=5)
+        self.boton_grad_simetrico_img1.grid(row=7, column=0, sticky="nsew", padx=5, pady=5)
+        self.boton_tophat_img1.grid(row=7, column=1, sticky="nsew", padx=5, pady=5)
+        self.boton_blackhat_img1.grid(row=8, column=0, sticky="nsew", padx=5, pady=5, columnspan=2)
+
         
 
     def _crear_componentes_operaciones_img2(self):
@@ -90,6 +109,15 @@ class TabulatorMorphology(ttk.Frame):
         self.boton_dilatacion_img2 = ttk.Button(self.marcoControlesImagen2, text="Dilatación", bootstyle=estiloControlesImg)
         self.boton_apertura_img2 = ttk.Button(self.marcoControlesImagen2, text="Apertura", bootstyle=estiloControlesImg)
         self.boton_cierre_img2 = ttk.Button(self.marcoControlesImagen2, text="Cierre", bootstyle=estiloControlesImg)
+        self.boton_frontera_img2 = ttk.Button(self.marcoControlesImagen2, text="Frontera", bootstyle=estiloControlesImg)
+        self.boton_hit_or_miss_img2 = ttk.Button(self.marcoControlesImagen2, text="Hit or Miss", bootstyle=estiloControlesImg)
+        self.boton_adelgazamiento_img2 = ttk.Button(self.marcoControlesImagen2, text="Adelgazamiento", bootstyle=estiloControlesImg)
+        self.boton_suavizado_morfologico_img2 = ttk.Button(self.marcoControlesImagen2, text="Suavizado morfológico", bootstyle=estiloControlesImg)
+        self.boton_grad_erosion_img2 = ttk.Button(self.marcoControlesImagen2, text="Gradiente por erosión", bootstyle=estiloControlesImg)
+        self.boton_grad_dilatacion_img2 = ttk.Button(self.marcoControlesImagen2, text="Gradiente por dilatación", bootstyle=estiloControlesImg)
+        self.boton_grad_simetrico_img2 = ttk.Button(self.marcoControlesImagen2, text="Gradiente simétrico", bootstyle=estiloControlesImg)
+        self.boton_tophat_img2 = ttk.Button(self.marcoControlesImagen2, text="Top-hat", bootstyle=estiloControlesImg)
+        self.boton_blackhat_img2 = ttk.Button(self.marcoControlesImagen2, text="Black-hat", bootstyle=estiloControlesImg)
         
         # Posicionamiento en el grid
         self.subtitulo_operaciones_img2.grid(row=0, column=0, columnspan=2, sticky="nsew", padx=5, pady=5)
@@ -98,5 +126,12 @@ class TabulatorMorphology(ttk.Frame):
         self.boton_dilatacion_img2.grid(row=2, column=1, sticky="nsew", padx=5, pady=5)
         self.boton_apertura_img2.grid(row=3, column=0, sticky="nsew", padx=5, pady=5)
         self.boton_cierre_img2.grid(row=3, column=1, sticky="nsew", padx=5, pady=5)
-        
-
+        self.boton_frontera_img2.grid(row=4, column=0, sticky="nsew", padx=5, pady=5)
+        self.boton_hit_or_miss_img2.grid(row=4, column=1, sticky="nsew", padx=5, pady=5)
+        self.boton_adelgazamiento_img2.grid(row=5, column=0, sticky="nsew", padx=5, pady=5)
+        self.boton_suavizado_morfologico_img2.grid(row=5, column=1, sticky="nsew", padx=5, pady=5)
+        self.boton_grad_erosion_img2.grid(row=6, column=0, sticky="nsew", padx=5, pady=5)
+        self.boton_grad_dilatacion_img2.grid(row=6, column=1, sticky="nsew", padx=5, pady=5)
+        self.boton_grad_simetrico_img2.grid(row=7, column=0, sticky="nsew", padx=5, pady=5)
+        self.boton_tophat_img2.grid(row=7, column=1, sticky="nsew", padx=5, pady=5)
+        self.boton_blackhat_img2.grid(row=8, column=0, sticky="nsew", padx=5, pady=5, columnspan=2)

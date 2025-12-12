@@ -915,7 +915,6 @@ class ProcesadorImagen:
         Returns:
             tuple: Imagen resultante, histograma y tipo de imagen.
         """
-
         if tipo_morfologia == 'Erosión':
             ProcesadorImagen.erosionar(imagen)
         elif tipo_morfologia == 'Dilatación':
@@ -924,28 +923,244 @@ class ProcesadorImagen:
             ProcesadorImagen.apertura(imagen)
         elif tipo_morfologia == 'Cierre':
             ProcesadorImagen.cierre(imagen)
+        elif tipo_morfologia == 'Frontera':
+            ProcesadorImagen.frontera(imagen)
+        elif tipo_morfologia == 'Hit or miss':
+            ProcesadorImagen.hit_or_miss(imagen)
+        elif tipo_morfologia == 'Adelgazamiento':
+            ProcesadorImagen.adelgazamiento(imagen)
+        elif tipo_morfologia == 'Suavizado morfológico':
+            ProcesadorImagen.suavizado_morfologico(imagen)
+        elif tipo_morfologia == 'Gradiente por erosión':
+            ProcesadorImagen.gradiente_por_erosion(imagen)
+        elif tipo_morfologia == 'Gradiente por dilatación':
+            ProcesadorImagen.gradiente_por_dilatacion(imagen)
+        elif tipo_morfologia == 'Gradiente morfológico':
+            ProcesadorImagen.gradiente_simetrico(imagen)
+        elif tipo_morfologia == 'Top-hat':
+            ProcesadorImagen.top_hat(imagen)
+        elif tipo_morfologia == 'Black-hat':
+            ProcesadorImagen.black_hat(imagen)
+
         return ProcesadorImagen.convertir_imagen_tk(imagen.imagen_modified)
 
-    @staticmethod
     def erosionar(imagen: ImagenData):
+        """
+        Erosión transformación.
+        
+        Implementa la transformación erosión para eliminar el ruido grande de la imagen.
+        
+        """
         kernel = np.ones((5,5), np.uint8)
         imagen_erosionada = cv2.erode(imagen.imagen_modified[:, :, 0], kernel, iterations = 1) 
         imagen.imagen_modified = cv2.merge((imagen_erosionada, imagen_erosionada, imagen_erosionada))
 
-    @staticmethod
     def dilatar(imagen: ImagenData):
+        """
+        Dilatación transformación.
+        
+        Implementa la transformación dilatación para expandir los objetos en la imagen.
+        
+        """
         kernel = np.ones((5,5), np.uint8)
         imagen_dilatada = cv2.dilate(imagen.imagen_modified[:, :, 0], kernel, iterations = 1)
         imagen.imagen_modified = cv2.merge((imagen_dilatada, imagen_dilatada, imagen_dilatada))
 
-    @staticmethod
     def apertura(imagen: ImagenData):
+        """
+        Apertura transformación.
+        
+        Implementa la transformación apertura para eliminar el ruido pequeño de la imagen.
+        
+        """
         kernel = np.ones((5,5), np.uint8)
         imagen_apertura = cv2.morphologyEx(imagen.imagen_modified[:, :, 0], cv2.MORPH_OPEN, kernel)
         imagen.imagen_modified = cv2.merge((imagen_apertura, imagen_apertura, imagen_apertura))
 
-    @staticmethod
     def cierre(imagen: ImagenData):
+        """
+        Cierre transformación.
+        
+        Implementa la transformación cierre para cerrar los agujeros en la imagen.
+        
+        """
         kernel = np.ones((5,5), np.uint8)
         imagen_cierre = cv2.morphologyEx(imagen.imagen_modified[:, :, 0], cv2.MORPH_CLOSE, kernel)
         imagen.imagen_modified = cv2.merge((imagen_cierre, imagen_cierre, imagen_cierre))
+
+    def frontera(imagen: ImagenData):
+        """
+        Frontera transformación.
+        
+        Implementa la transformación frontera para detectar la frontera de los objetos en la imagen.
+        
+        """
+        kernel = np.ones((5, 5), np.uint8)
+        canal_imagen = imagen.imagen_modified[:, :, 0]
+        erosion = cv2.erode(canal_imagen, kernel, iterations=1)
+        frontera = cv2.subtract(canal_imagen, erosion)
+        imagen.imagen_modified = cv2.merge((frontera, frontera, frontera))
+
+    def hit_or_miss(imagen: ImagenData):
+        """
+        Hit-or-miss transformación.
+        
+        Implementa la transformación hit-or-miss para detectar patrones específicos en la imagen.
+
+        """
+        kernel = np.array([[1, -1, -1],
+                           [1, 1, -1],
+                           [0, 1, 0]], dtype=np.int8)
+        
+        canal_imagen = imagen.imagen_modified[:, :, 0]
+        _, canal_imagen = cv2.threshold(canal_imagen, 127, 1, cv2.THRESH_BINARY)
+        
+        hitmiss = cv2.morphologyEx(canal_imagen, cv2.MORPH_HITMISS, kernel)
+        hitmiss = hitmiss * 255
+        imagen.imagen_modified = cv2.merge((hitmiss, hitmiss, hitmiss))
+
+    def adelgazamiento(imagen: ImagenData):
+        """
+        Adelgazamiento (Thinning) iterativo completo.
+        
+        Implementa la fórmula: THIN(X, B) = X - HMT_B(X)
+        Se repite el proceso con una secuencia de 8 kernels rotados 
+        hasta que la imagen se estabiliza (esqueleto).
+        """
+        canal_imagen = imagen.imagen_modified[:, :, 0]
+        _, imagen_binaria = cv2.threshold(canal_imagen, 127, 1, cv2.THRESH_BINARY)
+        
+        # 2. Definir los 8 Kernels de Adelgazamiento (Rotaciones de 45 grados)
+        
+        # Kernel 1: Detecta bordes Norte
+        k1 = np.array([[-1, -1, -1], 
+                       [ 0,  1,  0], 
+                       [ 1,  1,  1]], dtype=np.int8)
+        
+        # Kernel 2: Noroeste
+        k2 = np.array([[ 0, -1, -1], 
+                       [ 1,  1, -1], 
+                       [ 0,  1,  0]], dtype=np.int8)
+                       
+        # Kernel 3: Oeste
+        k3 = np.array([[ 1,  0, -1], 
+                       [ 1,  1, -1], 
+                       [ 1,  0, -1]], dtype=np.int8)
+                       
+        # Kernel 4: Suroeste
+        k4 = np.array([[ 0,  1,  0], 
+                       [ 1,  1, -1], 
+                       [ 0, -1, -1]], dtype=np.int8)
+                       
+        # Kernel 5: Sur
+        k5 = np.array([[ 1,  1,  1], 
+                       [ 0,  1,  0], 
+                       [-1, -1, -1]], dtype=np.int8)
+                       
+        # Kernel 6: Sureste
+        k6 = np.array([[ 0,  1,  0], 
+                       [-1,  1,  1], 
+                       [-1, -1,  0]], dtype=np.int8)
+                       
+        # Kernel 7: Este
+        k7 = np.array([[-1,  0,  1], 
+                       [-1,  1,  1], 
+                       [-1,  0,  1]], dtype=np.int8)
+                       
+        # Kernel 8: Noreste
+        k8 = np.array([[-1, -1,  0], 
+                       [-1,  1,  1], 
+                       [ 0,  1,  0]], dtype=np.int8)
+        
+        kernels = [k1, k2, k3, k4, k5, k6, k7, k8]
+
+        while True:
+            imagen_previa = imagen_binaria.copy()
+            for kernel in kernels:
+                hitmiss = cv2.morphologyEx(imagen_binaria, cv2.MORPH_HITMISS, kernel)
+                imagen_binaria = cv2.bitwise_and(imagen_binaria, cv2.bitwise_not(hitmiss))
+            
+            if np.array_equal(imagen_binaria, imagen_previa):
+                break
+
+        img_final = imagen_binaria * 255
+        imagen.imagen_modified = cv2.merge((img_final, img_final, img_final))
+
+    def suavizado_morfologico(imagen: ImagenData):
+        """
+        Filtro de Suavizado Morfológico.
+        Implementación exacta de la fórmula: tau(f) = (f o b) . b
+        (Apertura seguida de Clausura).
+        """
+        kernel = np.ones((5, 5), np.uint8)
+        
+        canal_imagen = imagen.imagen_modified[:, :, 0]
+
+        apertura = cv2.morphologyEx(canal_imagen, cv2.MORPH_OPEN, kernel)
+        suavizado_final = cv2.morphologyEx(apertura, cv2.MORPH_CLOSE, kernel)
+
+        imagen.imagen_modified = cv2.merge((suavizado_final, suavizado_final, suavizado_final))
+
+    def gradiente_por_erosion(imagen: ImagenData):
+        """
+        Implementa el Gradiente Morfológico por Erosión (Gradiente Interno).
+        Fórmula: p- = f - erosion(f)
+        """
+        kernel = np.ones((5, 5), np.uint8)
+        
+        canal_imagen = imagen.imagen_modified[:, :, 0]
+        
+        erosion = cv2.erode(canal_imagen, kernel, iterations=1)
+        gradiente = cv2.subtract(canal_imagen, erosion)
+        imagen.imagen_modified = cv2.merge((gradiente, gradiente, gradiente))
+
+    def gradiente_por_dilatacion(imagen: ImagenData):
+        """
+        Implementa el Gradiente Morfológico por Dilatación (Gradiente Externo).
+        Fórmula: p+ = dilatación(f) - f
+        """
+        kernel = np.ones((5, 5), np.uint8)
+        
+        canal_imagen = imagen.imagen_modified[:, :, 0]
+        
+        dilatacion = cv2.dilate(canal_imagen, kernel, iterations=1)
+        gradiente = cv2.subtract(dilatacion, canal_imagen)
+        imagen.imagen_modified = cv2.merge((gradiente, gradiente, gradiente))
+
+    def gradiente_simetrico(imagen: ImagenData):
+        """
+        Implementa el Gradiente Morfológico Simétrico.
+        Fórmula: p = p+ + p-
+        """
+        kernel = np.ones((5, 5), np.uint8)
+        dilatacion = cv2.dilate(imagen.imagen_modified[:, :, 0], kernel, iterations=1)
+        erosion = cv2.erode(imagen.imagen_modified[:, :, 0], kernel, iterations=1)
+        
+        gradiente_simetrico = cv2.subtract(dilatacion, erosion)
+        imagen.imagen_modified = cv2.merge((gradiente_simetrico, gradiente_simetrico, gradiente_simetrico))
+
+    def top_hat(imagen: ImagenData):
+        """
+        Implementa el Top-Hat Transformación.
+        Fórmula: p = f - opening(f)
+        """
+        kernel = np.ones((5, 5), np.uint8)
+        
+        canal_imagen = imagen.imagen_modified[:, :, 0]
+        
+        apertura = cv2.morphologyEx(canal_imagen, cv2.MORPH_OPEN, kernel)
+        top_hat = cv2.subtract(canal_imagen, apertura)
+        imagen.imagen_modified = cv2.merge((top_hat, top_hat, top_hat))
+
+    def black_hat(imagen: ImagenData):
+        """
+        Implementa el Black-Hat Transformación.
+        Fórmula: p = closing(f) - f
+        """
+        kernel = np.ones((5, 5), np.uint8)
+        
+        canal_imagen = imagen.imagen_modified[:, :, 0]
+        
+        cierre = cv2.morphologyEx(canal_imagen, cv2.MORPH_CLOSE, kernel)
+        black_hat = cv2.subtract(cierre, canal_imagen)
+        imagen.imagen_modified = cv2.merge((black_hat, black_hat, black_hat))

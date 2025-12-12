@@ -207,6 +207,42 @@ class ImageController:
         # Cierre
         self.tabulator_morphology.boton_cierre_img1.config(command= lambda: self.aplicar_morfologia("Cierre",1))
         self.tabulator_morphology.boton_cierre_img2.config(command= lambda: self.aplicar_morfologia("Cierre",2))
+        
+        # Frontera
+        self.tabulator_morphology.boton_frontera_img1.config(command= lambda: self.aplicar_morfologia("Frontera",1))
+        self.tabulator_morphology.boton_frontera_img2.config(command= lambda: self.aplicar_morfologia("Frontera",2))
+        
+        # Hit or miss
+        self.tabulator_morphology.boton_hit_or_miss_img1.config(command= lambda: self.aplicar_morfologia("Hit or miss",1))
+        self.tabulator_morphology.boton_hit_or_miss_img2.config(command= lambda: self.aplicar_morfologia("Hit or miss",2))
+        
+        # Adelgazamiento
+        self.tabulator_morphology.boton_adelgazamiento_img1.config(command= lambda: self.aplicar_morfologia("Adelgazamiento",1))
+        self.tabulator_morphology.boton_adelgazamiento_img2.config(command= lambda: self.aplicar_morfologia("Adelgazamiento",2))
+        
+        # Suavizado morfológico
+        self.tabulator_morphology.boton_suavizado_morfologico_img1.config(command= lambda: self.aplicar_morfologia("Suavizado morfológico",1))
+        self.tabulator_morphology.boton_suavizado_morfologico_img2.config(command= lambda: self.aplicar_morfologia("Suavizado morfológico",2))
+        
+        # Gradiente por erosión
+        self.tabulator_morphology.boton_grad_erosion_img1.config(command= lambda: self.aplicar_morfologia("Gradiente por erosión",1))
+        self.tabulator_morphology.boton_grad_erosion_img2.config(command= lambda: self.aplicar_morfologia("Gradiente por erosión",2))
+        
+        # Gradiente por dilatación
+        self.tabulator_morphology.boton_grad_dilatacion_img1.config(command= lambda: self.aplicar_morfologia("Gradiente por dilatación",1))
+        self.tabulator_morphology.boton_grad_dilatacion_img2.config(command= lambda: self.aplicar_morfologia("Gradiente por dilatación",2))
+        
+        # Gradiente simétrico
+        self.tabulator_morphology.boton_grad_simetrico_img1.config(command= lambda: self.aplicar_morfologia("Gradiente simétrico",1))
+        self.tabulator_morphology.boton_grad_simetrico_img2.config(command= lambda: self.aplicar_morfologia("Gradiente simétrico",2))
+        
+        # Top-hat
+        self.tabulator_morphology.boton_tophat_img1.config(command= lambda: self.aplicar_morfologia("Top-hat",1))
+        self.tabulator_morphology.boton_tophat_img2.config(command= lambda: self.aplicar_morfologia("Top-hat",2))
+        
+        # Black-hat
+        self.tabulator_morphology.boton_blackhat_img1.config(command= lambda: self.aplicar_morfologia("Black-hat",1))
+        self.tabulator_morphology.boton_blackhat_img2.config(command= lambda: self.aplicar_morfologia("Black-hat",2))
 
     def cargar_imagen(self, numero_imagen):
         """
@@ -610,6 +646,10 @@ class ImageController:
 
         if self.model.determinar_tipo_imagen(numero_imagen) not in ['binaria', 'gris']:
             self.view.mostrar_mensaje("La morfologia requiere que la imagen sea binaria o en escala de grises", "info")
+            return
+
+        if tipo_morfologia in ['Adelgazamiento', 'Hit or miss', 'Frontera']:
+            self.view.mostrar_mensaje("La morfologia requiere que la imagen sea binaria", "info")
             return
 
         imagen_morfologica = self.model.aplicar_morfologia(tipo_morfologia, numero_imagen)
