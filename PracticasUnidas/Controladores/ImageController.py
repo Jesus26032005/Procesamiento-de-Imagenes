@@ -648,7 +648,7 @@ class ImageController:
             self.view.mostrar_mensaje("La morfologia requiere que la imagen sea binaria o en escala de grises", "info")
             return
 
-        if tipo_morfologia in ['Adelgazamiento', 'Hit or miss', 'Frontera']:
+        if tipo_morfologia in ['Adelgazamiento', 'Hit or miss', 'Frontera'] and self.model.determinar_tipo_imagen(numero_imagen) != 'binaria':
             self.view.mostrar_mensaje("La morfologia requiere que la imagen sea binaria", "info")
             return
 

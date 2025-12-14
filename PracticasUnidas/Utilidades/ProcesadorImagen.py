@@ -935,7 +935,7 @@ class ProcesadorImagen:
             ProcesadorImagen.gradiente_por_erosion(imagen)
         elif tipo_morfologia == 'Gradiente por dilatación':
             ProcesadorImagen.gradiente_por_dilatacion(imagen)
-        elif tipo_morfologia == 'Gradiente morfológico':
+        elif tipo_morfologia == 'Gradiente simétrico':
             ProcesadorImagen.gradiente_simetrico(imagen)
         elif tipo_morfologia == 'Top-hat':
             ProcesadorImagen.top_hat(imagen)
@@ -995,7 +995,7 @@ class ProcesadorImagen:
         Implementa la transformación frontera para detectar la frontera de los objetos en la imagen.
         
         """
-        kernel = np.ones((5, 5), np.uint8)
+        kernel = np.ones((10, 10), np.uint8)
         canal_imagen = imagen.imagen_modified[:, :, 0]
         erosion = cv2.erode(canal_imagen, kernel, iterations=1)
         frontera = cv2.subtract(canal_imagen, erosion)
