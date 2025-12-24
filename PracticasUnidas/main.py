@@ -12,7 +12,7 @@ from Modelos.ImagenModel import ImageModel
 def main():
     """
     Función principal que arranca la aplicación.
-    
+        
     Pasos:
     1. Instancia la vista principal (MainWindow).
     2. Instancia el modelo de datos (ImageModel).
