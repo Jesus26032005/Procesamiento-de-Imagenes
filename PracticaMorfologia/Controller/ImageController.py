@@ -16,8 +16,7 @@ class ImageController:
         self.view.boton_convertir_grises.config(command= self.convertir_grises)
         self.view.boton_morfologia_cierre.config(command= lambda: self.aplicar_morfologia("Cierre"))
         self.view.boton_morfologia_dilatacion.config(command= lambda: self.aplicar_morfologia("Dilatacion"))
-        self.view.boton_operacion_not.config(command = self.operacion_not)
-        self.view.boton_binarizacion_fija.config(command = self.binarizar_fijo)
+        self.view.boton_binarizacion_inversa_fija.config(command = self.binarizar_inversa_fijo)
         self.view.boton_sumar_con_imagen_original.config(command = self.sumar_con_imagen_original)
 
     def cargar_imagen(self):
@@ -68,20 +67,7 @@ class ImageController:
         imagen_morfologica = self.model.aplicar_morfologia(tipo_morfologia)
         self.view.actualizar_imagen(imagen_morfologica[0], imagen_morfologica[1], imagen_morfologica[2])
 
-    def operacion_not(self):
-        if not self.model.checar_existencia_imagen():
-            self.view.mostrar_mensaje("No se tiene cargada una imagen.", "info")
-            return
-
-        if self.model.determinar_tipo_imagen() not in ['gris']:
-            self.view.mostrar_mensaje("La operación requiere que la imagen sea binaria", "info")
-            return
-
-        histograma = None
-        imagen_not = self.model.operacion_not()
-        self.view.actualizar_imagen(imagen_not[0], imagen_not[1], imagen_not[2])
-
-    def binarizar_fijo(self):
+    def binarizar_inversa_fijo(self):
         if not self.model.checar_existencia_imagen():
             self.view.mostrar_mensaje("No se tiene cargada una imagen.", "info")
             return
@@ -93,7 +79,7 @@ class ImageController:
 
         valorUmbral = self.view.aviso_binarizar_fijo()
         if valorUmbral:
-            imagen_binarizada = self.model.binarizar_imagen(valorUmbral)
+            imagen_binarizada = self.model.binarizar_inversa_fijo(valorUmbral)
             self.view.actualizar_imagen(imagen_binarizada[0], imagen_binarizada[1], imagen_binarizada[2])
 
     def sumar_con_imagen_original(self):

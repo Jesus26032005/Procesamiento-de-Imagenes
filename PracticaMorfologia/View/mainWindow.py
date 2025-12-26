@@ -46,7 +46,7 @@ class MainWindow(ttk.Window):
 
         self.tabla_de_control.columnconfigure(0, weight=1)
         for i in [0,4]: self.tabla_de_control.rowconfigure(i, weight=0)
-        for i in [1,2,3,5,6,7,8,9,10,11]: self.tabla_de_control.rowconfigure(i, weight=1)
+        for i in [1,2,3,5,6,7,8,9]: self.tabla_de_control.rowconfigure(i, weight=1)
 
         # SECCION DE OPERACIONES BASICAS
         self.label_titulo_operaciones_basicas = ttk.Label(self.tabla_de_control, text="Operaciones basicas", font=("Arial", 16, "bold"))
@@ -67,16 +67,14 @@ class MainWindow(ttk.Window):
         self.boton_convertir_grises = ttk.Button(self.tabla_de_control, text="Convertir a grises", bootstyle=estilo_panel_control_botones)
         self.boton_morfologia_cierre = ttk.Button(self.tabla_de_control, text="Morfologia Cierre", bootstyle=estilo_panel_control_botones)
         self.boton_morfologia_dilatacion = ttk.Button(self.tabla_de_control, text="Morfologia Dilatacion", bootstyle=estilo_panel_control_botones)
-        self.boton_operacion_not = ttk.Button(self.tabla_de_control, text="Operacion Not", bootstyle=estilo_panel_control_botones)
-        self.boton_binarizacion_fija = ttk.Button(self.tabla_de_control, text="Binarizacion Fija", bootstyle=estilo_panel_control_botones)
+        self.boton_binarizacion_inversa_fija = ttk.Button(self.tabla_de_control, text="Binarizacion Inversa Fija", bootstyle=estilo_panel_control_botones)
         self.boton_sumar_con_imagen_original = ttk.Button(self.tabla_de_control, text="Sumar con imagen original", bootstyle=estilo_panel_control_botones)
         
         self.boton_convertir_grises.grid(row=5, column=0, sticky="nsew", **paddingBotones)
         self.boton_morfologia_cierre.grid(row=6, column=0, sticky="nsew", **paddingBotones)
         self.boton_morfologia_dilatacion.grid(row=7, column=0, sticky="nsew", **paddingBotones)
-        self.boton_operacion_not.grid(row=8, column=0, sticky="nsew", **paddingBotones)
-        self.boton_binarizacion_fija.grid(row=9, column=0, sticky="nsew", **paddingBotones)
-        self.boton_sumar_con_imagen_original.grid(row=10, column=0, sticky="nsew", **paddingBotones)
+        self.boton_binarizacion_inversa_fija.grid(row=8, column=0, sticky="nsew", **paddingBotones)
+        self.boton_sumar_con_imagen_original.grid(row=9, column=0, sticky="nsew", **paddingBotones)
 
     def _configurar_panel_imagen(self):
         estiloImagen1 = "primary"

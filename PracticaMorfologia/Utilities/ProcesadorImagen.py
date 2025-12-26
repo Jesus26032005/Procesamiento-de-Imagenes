@@ -118,9 +118,9 @@ class ProcesadorImagen:
         return ProcesadorImagen.convertir_imagen_tk(imagen_1.imagen_modified)
 
     @staticmethod
-    def binarizar_metodo_fijo(imagen: ImagenData, umbral: int):
+    def binarizar_inversa_fijo(imagen: ImagenData, umbral: int):
         imagen_auxiliar = imagen.imagen_modified[:, :, 0]
-        _, imagen_auxiliar = cv2.threshold(imagen_auxiliar, umbral, 255, cv2.THRESH_BINARY)
+        _, imagen_auxiliar = cv2.threshold(imagen_auxiliar, umbral, 255, cv2.THRESH_BINARY_INV)
         imagen.imagen_modified = cv2.merge([imagen_auxiliar, imagen_auxiliar, imagen_auxiliar])
         imagen.tipo = 'binaria'
         return ProcesadorImagen.convertir_imagen_tk(imagen.imagen_modified)

@@ -47,9 +47,9 @@ class ImageModel:
         histograma = ProcesadorImagen.calcular_histograma_gris(self.imagen.imagen_modified)
         return (resultado_operacion, histograma, self.imagen.tipo)
 
-    def binarizar_imagen(self, umbral: int = None):
+    def binarizar_inversa_fijo(self, umbral: int = None):
         histograma = None
-        return (ProcesadorImagen.binarizar_metodo_fijo(self.imagen, umbral), histograma, self.imagen.tipo)
+        return (ProcesadorImagen.binarizar_inversa_fijo(self.imagen, umbral), histograma, self.imagen.tipo)
 
     def sumar_con_imagen_original(self):
         histograma = None
