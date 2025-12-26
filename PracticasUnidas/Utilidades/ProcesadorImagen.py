@@ -962,7 +962,7 @@ class ProcesadorImagen:
         Implementa la transformación dilatación para expandir los objetos en la imagen.
         
         """
-        kernel = np.ones((5,5), np.uint8)
+        kernel = np.ones((3,3), np.uint8)
         imagen_dilatada = cv2.dilate(imagen.imagen_modified[:, :, 0], kernel, iterations = 1)
         imagen.imagen_modified = cv2.merge((imagen_dilatada, imagen_dilatada, imagen_dilatada))
 
@@ -973,7 +973,7 @@ class ProcesadorImagen:
         Implementa la transformación apertura para eliminar el ruido pequeño de la imagen.
         
         """
-        kernel = np.ones((5,5), np.uint8)
+        kernel = np.ones((9,9), np.uint8)
         imagen_apertura = cv2.morphologyEx(imagen.imagen_modified[:, :, 0], cv2.MORPH_OPEN, kernel)
         imagen.imagen_modified = cv2.merge((imagen_apertura, imagen_apertura, imagen_apertura))
 
@@ -984,7 +984,7 @@ class ProcesadorImagen:
         Implementa la transformación cierre para cerrar los agujeros en la imagen.
         
         """
-        kernel = np.ones((5,5), np.uint8)
+        kernel = np.ones((9,9), np.uint8)
         imagen_cierre = cv2.morphologyEx(imagen.imagen_modified[:, :, 0], cv2.MORPH_CLOSE, kernel)
         imagen.imagen_modified = cv2.merge((imagen_cierre, imagen_cierre, imagen_cierre))
 
