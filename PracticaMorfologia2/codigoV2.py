@@ -95,6 +95,10 @@ class DetectorFlechaFiltros(ttk.Window):
             kernel_cierre = np.ones((15, 15), np.uint8)
             rombo_solido = cv2.morphologyEx(mascara_amarillo, cv2.MORPH_CLOSE, kernel_cierre)
 
+            kernel_dilatacion = np.ones((6, 6), np.uint8)
+            for _ in range(3):
+                rombo_solido = cv2.dilate(rombo_solido, kernel_dilatacion)
+
             # Aplicamos umbralización Inversa (Detectar símbolos negros)
             _, mascara_inversa = cv2.threshold(gray, 70, 255, cv2.THRESH_BINARY_INV)
 
@@ -102,7 +106,7 @@ class DetectorFlechaFiltros(ttk.Window):
             flecha_aislada = cv2.bitwise_and(mascara_inversa, mascara_inversa, mask=rombo_solido)
 
             # Aplicamos morfología: Apertura (Limpiamos ruido pequeño)
-            kernel_limpia = np.ones((3, 3), np.uint8)
+            kernel_limpia = np.ones((5, 5), np.uint8)
             flecha_final = cv2.morphologyEx(flecha_aislada, cv2.MORPH_OPEN, kernel_limpia)
 
             # 3. DETECCION Y DIBUJO
@@ -127,7 +131,7 @@ class DetectorFlechaFiltros(ttk.Window):
                 "FFT (Espectro)": espectro_vis,
                 "Filtro Gaussiano": blur,
                 "Mascara amarilla": mascara_amarillo,
-                "Morf: Cierre (Máscara)": rombo_solido,
+                "Morf: Cierre con dilatacion": rombo_solido,
                 "Umbral Inverso (Negros)": mascara_inversa,
                 "Lógica AND (Intersección)": flecha_aislada,
                 "Morf: Apertura (Final)": flecha_final,
