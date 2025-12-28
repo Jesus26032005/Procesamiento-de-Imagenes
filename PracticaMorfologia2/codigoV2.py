@@ -63,7 +63,7 @@ class DetectorFlechaFiltros(ttk.Window):
 
     def _procesar(self):
         # Abrimos el explorador de archivos para seleccionar la imagen
-        ruta = filedialog.askopenfilename(filetypes=[("Imágenes", "*.jpg *.jpeg *.png *.bmp")])
+        ruta = filedialog.askopenfilename(filetypes=[("Imágenes", "*.jpg *.jpeg *.png *.bmp *.webp")])
         if not ruta: 
             Messagebox.show_error("No se seleccionó ninguna imagen.", "Error")
             return
