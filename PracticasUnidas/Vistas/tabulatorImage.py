@@ -77,7 +77,7 @@ class TabulatorImage(ttk.Frame):
         
         # --- Frame de Operaciones Generales ---
         self.frame_operaciones_generales = ttk.Labelframe(self, text="Operaciones Basicas", bootstyle=estilosControlesBasicos)
-        for i in [2,3,4,6,7,8]: self.frame_operaciones_generales.rowconfigure(i, weight=1)
+        for i in [2,3,4,5,6,8,9,10,11]: self.frame_operaciones_generales.rowconfigure(i, weight=1)
         self.frame_operaciones_generales.columnconfigure(0, weight=1)
         self.frame_operaciones_generales.grid(row=3, column=0, sticky="nsew", **paddingFrames, rowspan=6)
 
@@ -88,12 +88,16 @@ class TabulatorImage(ttk.Frame):
         self.button_convertir_grises_img1 = ttk.Button(self.frame_operaciones_generales, text="Convertir a Escala de Grises", bootstyle=estilosControlesBasicos)
         self.button_binarizar_fijo_img1 = ttk.Button(self.frame_operaciones_generales, text="Binarizar con umbral fijo", bootstyle=estilosControlesBasicos)
         self.button_binarizar_otsu_img1 = ttk.Button(self.frame_operaciones_generales, text="Binarizar con Otsu", bootstyle=estilosControlesBasicos)
-        
+        self.button_valores_histograma_img1 = ttk.Button(self.frame_operaciones_generales, text="Valores del histograma", bootstyle=estilosControlesBasicos)
+        self.button_fourier_img1 = ttk.Button(self.frame_operaciones_generales, text="Transformada de Fourier", bootstyle=estilosControlesBasicos)
+
         # Operaciones Imagen 2
         self.label_operaciones_generales_title_img2 = ttk.Label(self.frame_operaciones_generales, text="Imagen 2", font=("Arial", 15, "bold"), anchor="center")
         self.button_convertir_grises_img2 = ttk.Button(self.frame_operaciones_generales, text="Convertir a Escala de Grises", bootstyle=estilosControlesBasicos)
         self.button_binarizar_fijo_img2 = ttk.Button(self.frame_operaciones_generales, text="Binarizar con umbral fijo", bootstyle=estilosControlesBasicos)
         self.button_binarizar_otsu_img2 = ttk.Button(self.frame_operaciones_generales, text="Binarizar con Otsu", bootstyle=estilosControlesBasicos)
+        self.button_valores_histograma_img2 = ttk.Button(self.frame_operaciones_generales, text="Valores del histograma", bootstyle=estilosControlesBasicos)
+        self.button_fourier_img2 = ttk.Button(self.frame_operaciones_generales, text="Transformada de Fourier", bootstyle=estilosControlesBasicos)
         
         # Layout Operaciones Generales
         self.label_operaciones_generales_title.grid(row=0, column=0, columnspan=2, **paddingTitulos)
@@ -101,10 +105,13 @@ class TabulatorImage(ttk.Frame):
         self.button_convertir_grises_img1.grid(row=2, column=0, sticky="ew", **paddingBotones)
         self.button_binarizar_fijo_img1.grid(row=3, column=0, sticky="ew", **paddingBotones)
         self.button_binarizar_otsu_img1.grid(row=4, column=0, sticky="ew", **paddingBotones)
-        self.label_operaciones_generales_title_img2.grid(row=5, column=0, sticky="nsew", **paddingBotones)
-        self.button_convertir_grises_img2.grid(row=6, column=0, sticky="ew", **paddingBotones)
-        self.button_binarizar_fijo_img2.grid(row=7, column=0, sticky="ew", **paddingBotones)
-        self.button_binarizar_otsu_img2.grid(row=8, column=0, sticky="ew", **paddingBotones)
+        self.button_valores_histograma_img1.grid(row=5, column=0, sticky="ew", **paddingBotones)
+        self.button_fourier_img1.grid(row=6, column=0, sticky="ew", **paddingBotones)
+        self.label_operaciones_generales_title_img2.grid(row=7, column=0, sticky="nsew", **paddingBotones)
+        self.button_convertir_grises_img2.grid(row=8, column=0, sticky="ew", **paddingBotones)
+        self.button_binarizar_fijo_img2.grid(row=9, column=0, sticky="ew", **paddingBotones)
+        self.button_binarizar_otsu_img2.grid(row=10, column=0, sticky="ew", **paddingBotones)
+        self.button_valores_histograma_img2.grid(row=11, column=0, sticky="ew", **paddingBotones)
     
     def pedir_ruta_archivo(self):
         """

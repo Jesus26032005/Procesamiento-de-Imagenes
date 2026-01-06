@@ -28,7 +28,7 @@ def main():
     # Crear la instancia del controlador, inyectando dependencias de modelo y vista
     controlador = ImageController(model=modelo, view=root) 
     
-    # Iniciar el bucle de eventos de la interfaz gráficaz3
+    # Iniciar el bucle de eventos de la interfaz gráficaz
     root.mainloop()
 
 if __name__ == "__main__":

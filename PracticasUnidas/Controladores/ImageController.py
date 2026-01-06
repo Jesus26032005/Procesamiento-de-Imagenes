@@ -30,6 +30,7 @@ class ImageController:
         self.conectar_eventos_segmentacion()
         self.conectar_eventos_ajuste_brillo()
         self.conectar_eventos_morfologia()
+        self.conectar_eventos_colores()
 
     def conectar_eventos_basicos(self):
         """
@@ -61,6 +62,14 @@ class ImageController:
         # Eventos para guardar imágenes
         self.tabulador_main.button_guardar_img1.config(command= lambda: self.guardar_imagen(1))
         self.tabulador_main.button_guardar_img2.config(command= lambda: self.guardar_imagen(2))
+
+        # Eventos para valores del histograma
+        self.tabulador_main.button_valores_histograma_img1.config(command= lambda: self.valores_histograma(1))
+        self.tabulador_main.button_valores_histograma_img2.config(command= lambda: self.valores_histograma(2))
+
+        # Eventos para transformada de fourier
+        self.tabulador_main.button_fourier_img1.config(command= lambda: self.transformada_fourier(1))
+        self.tabulador_main.button_fourier_img2.config(command= lambda: self.transformada_fourier(2))
 
     def conectar_eventos_operaciones(self):
         """
@@ -243,6 +252,79 @@ class ImageController:
         # Black-hat
         self.tabulator_morphology.boton_blackhat_img1.config(command= lambda: self.aplicar_morfologia("Black-hat",1))
         self.tabulator_morphology.boton_blackhat_img2.config(command= lambda: self.aplicar_morfologia("Black-hat",2))
+
+    def conectar_eventos_colores(self):
+        """
+        Conecta los eventos de los botones de la pestaña de colores.
+        """
+        self.tabulator_colors = self.view.tabulator_colors
+
+        self.tabulator_colors.boton_mostrar_modelo_de_color_RGB_IMG1.config(command= lambda: self.mostrar_modelo_color("RGB",1))
+        self.tabulator_colors.boton_mostrar_modelo_de_color_RGB_IMG2.config(command= lambda: self.mostrar_modelo_color("RGB",2))
+        
+        self.tabulator_colors.boton_mostrar_modelo_de_color_HSV_IMG1.config(command= lambda: self.mostrar_modelo_color("HSV",1))
+        self.tabulator_colors.boton_mostrar_modelo_de_color_HSV_IMG2.config(command= lambda: self.mostrar_modelo_color("HSV",2))
+        
+        self.tabulator_colors.boton_mostrar_modelo_de_color_CMY_IMG1.config(command= lambda: self.mostrar_modelo_color("CMY",1))
+        self.tabulator_colors.boton_mostrar_modelo_de_color_CMY_IMG2.config(command= lambda: self.mostrar_modelo_color("CMY",2))
+
+        self.tabulator_colors.boton_mostrar_mapa_de_colores_Img1.config(command= lambda: self.mostrar_mapa_de_colores(1))
+        self.tabulator_colors.boton_mostrar_mapa_de_colores_Img2.config(command= lambda: self.mostrar_mapa_de_colores(2))
+
+    def mostrar_modelo_color(self, modelo_color, numero_imagen):
+        """
+        Muestra el modelo de color seleccionado para la imagen especificada.
+        
+        Args:
+            modelo_color (str): El modelo de color a mostrar ("RGB", "HSV", "CMY").
+            numero_imagen (int): Identificador de la imagen (1 o 2).
+        """
+        if not self.model.checar_existencia_imagen(numero_imagen):
+            self.view.mostrar_mensaje("No se tiene cargada la imagen", "info")
+            return
+        
+        if self.model.determinar_tipo_imagen(numero_imagen) in ["gris", "binaria", "componentes"]:
+            self.view.mostrar_mensaje("La imagen se debe encontrar en color", "info")
+            return
+        
+        resultado = self.model.mostrar_modelo_color(modelo_color, numero_imagen)
+        self.view.mostrar_en_ventana_modelo_color(resultado[0], resultado[1], resultado[2], modelo_color)
+
+    def mostrar_mapa_de_colores(self, numero_imagen):
+        """
+        Muestra el mapa de colores de la imagen especificada.
+        
+        Args:
+            numero_imagen (int): Identificador de la imagen (1 o 2).
+        """
+        if not self.model.checar_existencia_imagen(numero_imagen):
+            self.view.mostrar_mensaje("No se tiene cargada la imagen", "info")
+            return
+        
+        if self.model.determinar_tipo_imagen(numero_imagen) in ["gris", "binaria", "componentes"]:
+            self.view.mostrar_mensaje("La imagen se debe encontrar en color", "info")
+            return
+        
+        imagen_gris_cv = self.model.mostrar_mapa_de_colores(numero_imagen)
+        self.view.mostrar_ventana_mapas_colores(imagen_gris_cv)
+
+    def valores_histograma(self, numero_imagen):
+        """
+        Muestra los valores del histograma de la imagen especificada.
+        
+        Args:
+            numero_imagen (int): Identificador de la imagen (1 o 2).
+        """
+        if not self.model.checar_existencia_imagen(numero_imagen):
+            self.view.mostrar_mensaje("No se tiene cargada la imagen", "info")
+            return
+
+        if self.model.determinar_tipo_imagen(numero_imagen) in ["binaria", "componentes"]:
+            self.view.mostrar_mensaje("La imagen se debe encontrar en color o gris", "info")
+            return
+        
+        resultados = self.model.calcular_valores_histograma(numero_imagen)
+        self.view.mostrar_mensaje_valores_histograma(resultados)
 
     def cargar_imagen(self, numero_imagen):
         """
@@ -654,3 +736,25 @@ class ImageController:
 
         imagen_morfologica = self.model.aplicar_morfologia(tipo_morfologia, numero_imagen)
         self.view.actualizar_imagen(imagen_morfologica[0], imagen_morfologica[1], numero_imagen, imagen_morfologica[2])
+
+    def transformada_fourier(self, numero_imagen):
+        """
+        Aplica transformada de fourier a la imagen.
+        
+        Args:
+            numero_imagen (int): Identificador de la imagen (1 o 2).
+        """
+        if not self.model.checar_existencia_imagen(numero_imagen):
+            self.view.mostrar_mensaje("No se tiene cargada la imagen", "info")
+            return
+
+        if self.model.determinar_tipo_imagen(numero_imagen) == 'componentes':
+            self.view.mostrar_mensaje("La imagen se encuentra etiqueta por tanto no es posible realizar ninguna operacion, reinicie la imagen para continuar", "info")
+            return
+
+        if self.model.determinar_tipo_imagen(numero_imagen) in ['binaria', "gris"]:
+            self.view.mostrar_mensaje("La transformada de fourier requiere que la imagen sea en color", "info")
+            return
+
+        imagen_fourier = self.model.visualizar_aplicacion_transformada_fourier(numero_imagen)
+        self.view.analisis_frecuencia_completo(imagen_fourier)

@@ -33,6 +33,7 @@ class ProcesadorImagen:
         """
         try:
             imagen_pillow = Image.open(ruta)
+            imagen_pillow = imagen_pillow.convert("RGB")
             imagen_cv = np.array(imagen_pillow)
             # Redimensionar para ajustar a la interfaz (opcional, hardcoded a 1400x600)
             imagen_cv= cv2.resize(imagen_cv, (1400, 600))
@@ -1164,3 +1165,89 @@ class ProcesadorImagen:
         cierre = cv2.morphologyEx(canal_imagen, cv2.MORPH_CLOSE, kernel)
         black_hat = cv2.subtract(cierre, canal_imagen)
         imagen.imagen_modified = cv2.merge((black_hat, black_hat, black_hat))
+
+    def convertir_modelo_color(modelo_color: str, imagen: ImagenData):
+        """
+        Convierte la imagen a un modelo de color específico.
+        
+        Args:
+            modelo_color (str): El modelo de color a convertir ("RGB", "HSV", "CMY").
+            imagen (np.ndarray): Matriz de la imagen.
+            
+        Returns:
+            np.ndarray: Matriz de la imagen convertida.
+        """
+        if modelo_color == "RGB":
+            rojo, verde, azul = cv2.split(imagen.imagen_modified)
+            return (rojo, verde, azul)
+        elif modelo_color == "HSV":
+            hsv = cv2.cvtColor(imagen.imagen_modified, cv2.COLOR_RGB2HSV)
+            h, s, v = cv2.split(hsv)
+            return (h, s, v)
+        elif modelo_color == "CMY":
+            rojo, verde, azul = cv2.split(imagen.imagen_modified)
+            c = 255 - rojo
+            m = 255 - verde
+            y = 255 - azul
+            return (c, m, y)
+
+    def devolver_imagen_gris_cv(imagen: ImagenData):
+        """
+        Convierte la imagen a gris CV.
+        
+        Args:
+            imagen (np.ndarray): Matriz de la imagen.
+            
+        Returns:
+            np.ndarray: Matriz de la imagen convertida a gris CV.
+        """
+        gris = cv2.cvtColor(imagen.imagen_modified, cv2.COLOR_RGB2GRAY)
+        return gris
+
+    def calcular_valores_histograma(imagen: ImagenData):
+        """
+        Calcula los valores del histograma de la imagen.
+        
+        Args:
+            imagen (ImagenData): Objeto que contiene la imagen.
+            
+        Returns:
+            tuple: Valores del histograma.
+        """
+        tipo = imagen.tipo
+        if tipo == 'rgb':
+            canales = cv2.split(imagen.imagen_modified)
+        if tipo == 'gris':
+            canales = [imagen.imagen_modified[:, :, 0]]
+        
+        resultadosPorCanal = []  # Lista para almacenar las propiedades de cada canal
+        for canal in canales:  # Itera sobre cada canal RGB
+            pixels = canal.flatten()  # Convierte la matriz 2D del canal en un vector 1D
+            N = len(pixels)  # Número total de píxeles en el canal
+            unico, conteo = np.unique(pixels, return_counts=True)  # Obtiene valores únicos y sus conteos
+            probabilidad = conteo / N  # Calcula la probabilidad de cada valor de intensidad
+            media = float(np.sum(unico * probabilidad))  # Calcula la media ponderada
+            entropia = float(-np.sum(probabilidad * np.log2(probabilidad)))  # Calcula la entropía (medida de información)
+            varianza = float(np.sum(((unico - media) ** 2) * probabilidad))  # Calcula la varianza
+            asimetria = float(np.sum(((unico - media) ** 3) * probabilidad))  # Calcula la asimetría (skewness)
+            energia = float(np.sum(probabilidad ** 2))  # Calcula la energía (uniformidad)
+            listaPropiedades = [media, entropia, varianza, asimetria, energia]  # Agrupa todas las propiedades
+            resultadosPorCanal.append(listaPropiedades)  # Agrega las propiedades del canal a la lista
+        
+        lista_propiedades_por_canal = []
+        canales_tipo = []
+        if tipo == 'rgb':
+            canales_tipo = ["Rojo", "Verde", "Azul"]
+        if tipo == 'gris':
+            canales_tipo = ["Gris"]
+        #Le damos formato a la lista de resultados
+        for i in range(len(resultadosPorCanal)):
+            string_por_canales = (
+                f"{canales_tipo[i]}: Media = {resultadosPorCanal[i][0]:.4f}\n"
+                f"Entropia = {resultadosPorCanal[i][1]:.4f}\n"
+                f"Varianza = {resultadosPorCanal[i][2]:.4f}\n"
+                f"Asimetria = {resultadosPorCanal[i][3]:.4f}\n"
+                f"Energia = {resultadosPorCanal[i][4]:.4f}"
+            )
+            lista_propiedades_por_canal.append(string_por_canales)
+        return lista_propiedades_por_canal

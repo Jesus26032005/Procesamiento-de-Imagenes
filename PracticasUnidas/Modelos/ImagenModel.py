@@ -392,3 +392,57 @@ class ImageModel:
         else:
             histograma = None
         return (imagen_modificada, histograma, imagen.tipo)
+
+    def mostrar_modelo_color(self, modelo_color, numero_imagen):
+        """
+        Muestra el modelo de color seleccionado para la imagen especificada.
+        
+        Args:
+            modelo_color (str): El modelo de color a mostrar ("RGB", "HSV", "CMY").
+            numero_imagen (int): Identificador de la imagen (1 o 2).
+            
+        Returns:
+            tuple: Imagen TK en el modelo de color especificado y histograma.
+        """
+        imagen = self._determinarImagen(numero_imagen)
+        resultado = ProcesadorImagen.convertir_modelo_color(modelo_color, imagen)
+        return resultado
+
+    def mostrar_mapa_de_colores(self, numero_imagen):
+        """
+        Devuelve imagen en gris para el mapa de colores de la imagen especificada.
+        
+        Args:
+            numero_imagen (int): Identificador de la imagen (1 o 2).
+            
+        Returns:
+            Image: Imagen en gris
+        """
+        imagen = self._determinarImagen(numero_imagen)
+        return ProcesadorImagen.devolver_imagen_gris_cv(imagen)
+
+    def calcular_valores_histograma(self, numero_imagen):
+        """
+        Calcula los valores del histograma de la imagen especificada.
+        
+        Args:
+            numero_imagen (int): Identificador de la imagen (1 o 2).
+            
+        Returns:
+            tuple: Histograma de la imagen.
+        """
+        imagen = self._determinarImagen(numero_imagen)
+        return ProcesadorImagen.calcular_valores_histograma(imagen)
+
+    def visualizar_aplicacion_transformada_fourier(self, numero_imagen):
+        """
+        Devuelve la imagen en grises.
+        
+        Args:
+            numero_imagen (int): Identificador de la imagen (1 o 2).
+            
+        Returns:
+            Image: Imagen en grises
+        """
+        imagen = self._determinarImagen(numero_imagen)
+        return ProcesadorImagen.devolver_imagen_gris_cv(imagen)
